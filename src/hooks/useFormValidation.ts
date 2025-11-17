@@ -27,6 +27,14 @@ export function useFormValidation() {
     return valid;
   }
 
-  return { errors, setErrors, validateUrls };
+  function clearError(index: number) {
+    setErrors((prev) => {
+      const next = [...prev];
+      next[index] = "";
+      return next;
+    });
+  }
+
+  return { errors, setErrors, validateUrls, clearError };
 }
 

@@ -4,102 +4,95 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
-import { StyleVariant } from "@/components/email-templates/EmailPreview";
 import { LinkInputs } from "./LinkInputs";
-import { StyleSelector } from "./StyleSelector";
 
 interface QuotationFormProps {
   linkCount: number;
   onLinkCountChange(value: number): void;
-  style: StyleVariant;
-  onStyleChange(value: StyleVariant): void;
   urls: string[];
+  planNames: string[];
+  idealFor: string[];
   errors: string[];
   onUrlChange(index: number, value: string): void;
+  onPlanNameChange(index: number, value: string): void;
+  onIdealForChange(index: number, value: string): void;
   comments: string;
   onCommentsChange(value: string): void;
   onGenerate(): void;
-  onFillSample(): void;
   loading: boolean;
 }
 
 export function QuotationForm({
   linkCount,
   onLinkCountChange,
-  style,
-  onStyleChange,
   urls,
+  planNames,
+  idealFor,
   errors,
   onUrlChange,
+  onPlanNameChange,
+  onIdealForChange,
   comments,
   onCommentsChange,
   onGenerate,
-  onFillSample,
   loading,
 }: QuotationFormProps) {
   return (
     <Card className="space-y-6">
-      <div>
-        <h2 className="mb-1 text-sm font-semibold text-white">Configuración de propuesta</h2>
+      <div className="border-b border-white/10 pb-4">
+        <h2 className="mb-1 text-base font-semibold text-white">Configuración de Propuesta</h2>
         <p className="text-xs text-white/60">
-          Pega hasta tres URLs de cotización, elige un diseño y genera un email listo para ventas.
+          Personaliza tus propuestas de licenciamiento
         </p>
       </div>
 
-      <div className="space-y-5">
-        <div className="space-y-2">
-          <label className="flex items-center justify-between text-xs text-white/60">
-            <span className="text-white">Número de cotizaciones</span>
-            <span>1-3 enlaces</span>
-          </label>
+      <div className="space-y-6">
+
+        {/* Número de cotizaciones */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-white/80">📊 Número de propuestas</span>
+            <span className="rounded px-2 py-1 text-[11px] bg-white/10 text-white/60">{linkCount} seleccionada{linkCount !== 1 ? 's' : ''}</span>
+          </div>
           <Select
             value={String(linkCount)}
             onChange={(event) => onLinkCountChange(Number(event.target.value))}
           >
-            <option value="1">1 enlace</option>
-            <option value="2">2 enlaces</option>
-            <option value="3">3 enlaces</option>
+            <option value="1">1 propuesta</option>
+            <option value="2">2 propuestas</option>
+            <option value="3">3 propuestas</option>
           </Select>
         </div>
 
-        <div className="space-y-2">
-          <label className="flex items-center justify-between text-xs text-white/60">
-            <span className="text-white">Estilo de diseño</span>
-            <span>3 diseños</span>
-          </label>
-          <StyleSelector value={style} onChange={(value) => onStyleChange(value as StyleVariant)} />
-        </div>
-
-        <div className="space-y-2">
-          <label className="flex items-center justify-between text-xs text-white/60">
-            <span className="text-white">URLs de cotización</span>
-            <span>Validados antes de generar</span>
-          </label>
-          <LinkInputs linkCount={linkCount} urls={urls} errors={errors} onUrlChange={onUrlChange} />
+        {/* Nombres y URLs de cotización */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-white/80">🔗 Propuestas</span>
+            <span className="rounded px-2 py-1 text-[11px] bg-white/10 text-white/60">Nombres editables</span>
+          </div>
+          <LinkInputs linkCount={linkCount} urls={urls} planNames={planNames} idealFor={idealFor} errors={errors} onUrlChange={onUrlChange} onPlanNameChange={onPlanNameChange} onIdealForChange={onIdealForChange} />
           <p className="text-xs text-white/50">
-            * El patrón se valida contra <code>https://odoo.com/my/orders/...</code>.
+            * URLs de Odoo: <code className="bg-white/5 px-1 py-0.5 rounded text-[11px]">https://odoo.com/my/orders/...</code>
           </p>
         </div>
 
-        <div className="space-y-2">
-          <label className="flex items-center justify-between text-xs text-white/60">
-            <span className="text-white">Comentarios adicionales</span>
-            <span>Opcional</span>
-          </label>
+        {/* Comentarios adicionales */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-white/80">💡 A tener en cuenta</span>
+            <span className="rounded px-2 py-1 text-[11px] bg-white/10 text-white/60">Opcional</span>
+          </div>
           <Textarea
-            placeholder="Ejemplo: Esta propuesta incluye soporte prioritario e incorporación..."
+            placeholder="Agrega información que consideres importante para tus clientes..."
             value={comments}
             onChange={(event) => onCommentsChange(event.target.value)}
           />
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-3">
-        <Button onClick={onGenerate} loading={loading}>
-          ⚡ Generar HTML
-        </Button>
-        <Button type="button" variant="ghost" onClick={onFillSample} disabled={loading}>
-          Rellenar datos de ejemplo
+      <div className="border-t border-white/10 pt-6">
+        <Button onClick={onGenerate} loading={loading} className="w-full">
+          ⚡ Generar Correo
         </Button>
       </div>
     </Card>

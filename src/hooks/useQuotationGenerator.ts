@@ -7,12 +7,11 @@ import { QuotationPlan } from "@/lib/types/quotation";
 import { useFormValidation } from "./useFormValidation";
 
 const STYLE_LABELS: Record<StyleVariant, string> = {
-  style1: "Estilo 1",
-  style2: "Estilo 2",
-  style3: "Estilo 3",
+  style1: "Moderno",
+  style2: "Compacto",
+  style3: "Minimalista",
 };
 
-const SAMPLE_URL = "https://www.odoo.com/my/orders/6970352?access_token=55c22618-2c2b-4ac5-a510-4c8adfa4abce";
 
 type StatusVariant = "neutral" | "success" | "error";
 
@@ -20,17 +19,23 @@ export function useQuotationGenerator() {
   const [linkCount, setLinkCount] = useState(3);
   const [style, setStyle] = useState<StyleVariant>("style1");
   const [urls, setUrls] = useState(["", "", ""]);
+  const [planNames, setPlanNames] = useState(["Plan Esencial", "Plan Equilibrado", "Plan Premium"]);
+  const [idealFor, setIdealFor] = useState([
+    "Validar roadmap con menor compromiso",
+    "La inversión más equilibrada",
+    "Más ahorro, retorno más rápido"
+  ]);
   const [comments, setComments] = useState("");
   const [plans, setPlans] = useState<QuotationPlan[]>([]);
   const [htmlOutput, setHtmlOutput] = useState("");
-  const [viewMode, setViewMode] = useState<"code" | "preview">("code");
+  const [viewMode, setViewMode] = useState<"code" | "preview">("preview");
   const [statusMessage, setStatusMessage] = useState("Listo para generar.");
   const [statusVariant, setStatusVariant] = useState<StatusVariant>("neutral");
   const [statusRight, setStatusRight] = useState("");
   const [loading, setLoading] = useState(false);
 
   const urlsToUse = useMemo(() => urls.slice(0, linkCount), [urls, linkCount]);
-  const { errors, validateUrls } = useFormValidation();
+  const { errors, validateUrls, clearError } = useFormValidation();
 
   const updateUrl = useCallback((index: number, value: string) => {
     setUrls((prev) => {
@@ -38,13 +43,26 @@ export function useQuotationGenerator() {
       next[index] = value;
       return next;
     });
+    // Clear error for this field when user starts typing
+    clearError(index);
+  }, [clearError]);
+
+  const updatePlanName = useCallback((index: number, value: string) => {
+    setPlanNames((prev) => {
+      const next = [...prev];
+      next[index] = value;
+      return next;
+    });
   }, []);
 
-  const fillSampleData = useCallback(() => {
-    setUrls((prev) => prev.map(() => SAMPLE_URL));
-    setStatusMessage("Enlaces de ejemplo agregados. Reemplázalos con tus cotizaciones reales antes de enviar.");
-    setStatusVariant("neutral");
+  const updateIdealFor = useCallback((index: number, value: string) => {
+    setIdealFor((prev) => {
+      const next = [...prev];
+      next[index] = value;
+      return next;
+    });
   }, []);
+
 
   const handleGenerate = useCallback(async () => {
     if (!validateUrls(urlsToUse)) {
@@ -72,9 +90,17 @@ export function useQuotationGenerator() {
       }
 
       const data = (await response.json()) as { plans: QuotationPlan[] };
-      setPlans(data.plans);
+      
+      // Apply custom plan names and idealFor
+      const plansWithCustomFields = data.plans.map((plan, idx) => ({
+        ...plan,
+        title: planNames[idx] || plan.title,
+        summaryLine: idealFor[idx] || plan.summaryLine,
+      }));
+      
+      setPlans(plansWithCustomFields);
 
-      const generatedHtml = generateEmailHtml(style, data.plans, comments);
+      const generatedHtml = generateEmailHtml(style, plansWithCustomFields, comments);
       setHtmlOutput(generatedHtml);
       setStatusMessage("HTML generado exitosamente.");
       setStatusVariant("success");
@@ -95,11 +121,14 @@ export function useQuotationGenerator() {
     style,
     setStyle,
     urls,
+    planNames,
+    idealFor,
+    updatePlanName,
+    updateIdealFor,
     errors,
     comments,
     setComments,
     updateUrl,
-    fillSampleData,
     handleGenerate,
     loading,
     plans,

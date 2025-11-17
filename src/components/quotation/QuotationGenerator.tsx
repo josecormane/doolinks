@@ -6,31 +6,33 @@ import { QuotationForm } from "./QuotationForm";
 import { OutputPanel } from "./OutputPanel";
 import { useQuotationGenerator } from "@/hooks/useQuotationGenerator";
 
-const BADGES = ["Validación de patrón de URL", "3 diseños de email", "Modos código y vista previa"];
 
 export function QuotationGenerator() {
-  const {
-    linkCount,
-    setLinkCount,
-    style,
-    setStyle,
-    urls,
-    errors,
-    comments,
-    setComments,
-    updateUrl,
-    fillSampleData,
-    handleGenerate,
-    loading,
-    plans,
-    htmlOutput,
-    setHtmlOutput,
-    viewMode,
-    setViewMode,
-    statusMessage,
-    statusVariant,
-    statusRight,
-  } = useQuotationGenerator();
+    const {
+      linkCount,
+      setLinkCount,
+      style,
+      setStyle,
+      urls,
+      planNames,
+      idealFor,
+      updatePlanName,
+      updateIdealFor,
+      errors,
+      comments,
+      setComments,
+      updateUrl,
+      handleGenerate,
+      loading,
+      plans,
+      htmlOutput,
+      setHtmlOutput,
+      viewMode,
+      setViewMode,
+      statusMessage,
+      statusVariant,
+      statusRight,
+    } = useQuotationGenerator();
 
   const handleLinkCountChange = (value: number) => {
     const next = Math.min(3, Math.max(1, value));
@@ -49,31 +51,22 @@ export function QuotationGenerator() {
         <p className="text-sm text-white/70">
           Pega de 1 a 3 URLs de cotización, elige un diseño y exporta HTML listo para email de ventas.
         </p>
-        <div className="flex flex-wrap gap-2">
-          {BADGES.map((badge) => (
-            <span
-              key={badge}
-              className="rounded-full border border-white/10 px-3 py-1 text-[11px] text-white/70"
-            >
-              {badge}
-            </span>
-          ))}
-        </div>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1.2fr)]">
+      <div className="grid gap-6 lg:grid-cols-[25%_75%]">
         <QuotationForm
           linkCount={linkCount}
           onLinkCountChange={handleLinkCountChange}
-          style={style}
-          onStyleChange={(value) => setStyle(value as StyleVariant)}
           urls={urls}
+          planNames={planNames}
+          idealFor={idealFor}
           errors={errors}
           onUrlChange={updateUrl}
+          onPlanNameChange={updatePlanName}
+          onIdealForChange={updateIdealFor}
           comments={comments}
           onCommentsChange={setComments}
           onGenerate={handleGenerate}
-          onFillSample={fillSampleData}
           loading={loading}
         />
 
@@ -85,6 +78,7 @@ export function QuotationGenerator() {
             onHtmlChange={setHtmlOutput}
             plans={plans}
             style={style}
+            onStyleChange={(value) => setStyle(value as StyleVariant)}
             comments={comments}
             statusMessage={statusMessage}
             statusVariant={statusVariant}
