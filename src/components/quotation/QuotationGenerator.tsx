@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Card } from "@/components/ui/Card";
 import { StyleVariant } from "@/components/email-templates/EmailPreview";
 import { QuotationForm } from "./QuotationForm";
@@ -43,6 +44,13 @@ export function QuotationGenerator() {
     <div className="space-y-6">
       <header className="space-y-2 rounded-3xl border border-white/10 bg-white/5 p-6 text-white shadow-[0_25px_60px_rgba(0,0,0,0.5)]">
         <div className="flex flex-wrap items-center gap-3">
+          <Image
+            src="/odoolinks-logo2.png"
+            alt="OdooLinks Logo"
+            width={40}
+            height={40}
+            className="rounded-lg"
+          />
           <h1 className="text-lg font-semibold">Generador de propuestas Odoo</h1>
           <span className="rounded-full border border-[#32d0ff]/50 px-3 py-1 text-xs text-[#32d0ff]">
             beta
