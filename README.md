@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Overview
 
-## Getting Started
+3links is a small Next.js 16 application that turns 1-3 public Odoo quotation links into a polished HTML email ready for sales teams. A dedicated API route proxies the remote HTML, parses the commercial data with Cheerio, and feeds a set of Tailwind-driven React components plus exportable email templates.
 
-First, run the development server:
+## Key features
+
+- **Next.js App Router + TypeScript** with modular components, hooks, and server actions.
+- **Tailwind CSS v4** for the UI shell plus custom utilities for gradients and cards.
+- **Server-side proxy** at `POST /api/fetch-quotation` that bypasses CORS, validates URLs, and parses totals with Cheerio.
+- **Three reusable email templates** (cards, compact table, minimal) rendered live inside the app and exported as full HTML.
+- **Client hook orchestration** (`useQuotationGenerator`) for validation, status handling, and HTML generation.
+
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit [http://localhost:3000](http://localhost:3000) to use the generator.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+No secrets are required because users paste signed Odoo quotation URLs manually. If you later need to inject headers or cookies, expose them to the API route through `.env.local` and read them inside `src/app/api/fetch-quotation/route.ts`.
 
-## Learn More
+## Development workflow
 
-To learn more about Next.js, take a look at the following resources:
+| Command        | Description                                   |
+| -------------- | --------------------------------------------- |
+| `npm run dev`  | Start the Next.js development server          |
+| `npm run lint` | Run ESLint (includes Next.js core web vitals) |
+| `npm run build`/`start` | Production build and serve          |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## API contract
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+POST /api/fetch-quotation
+Body: { "urls": ["https://www.odoo.com/my/orders/..."] } // 1-3 entries
+Response: { "plans": QuotationPlan[] }
+```
 
-## Deploy on Vercel
+Each plan contains the parsed totals, quantities, payment terms, savings breakdown, and the CTA URL that points back to the original quotation.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Project structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `src/app/page.tsx` – Shell that renders the `QuotationGenerator`.
+- `src/components/quotation/*` – Form controls, preview panel, and UI primitives.
+- `src/components/email-templates/*` – Pure functions that build the different email layouts.
+- `src/hooks/*` – Validation and orchestration logic.
+- `src/lib/parsers/*` – HTML parsing utilities and type definitions.
+- `legacy/` – Original static prototype retained for reference only.
