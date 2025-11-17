@@ -10,7 +10,7 @@ export interface TabOption {
   icon?: string;
 }
 
-interface TabsProps extends HTMLAttributes<HTMLDivElement> {
+interface TabsProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange"> {
   options: TabOption[];
   value: string;
   onChange(value: string): void;
