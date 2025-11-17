@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Tabs } from "@/components/ui/Tabs";
 import { Textarea } from "@/components/ui/Textarea";
 import { StatusMessage } from "@/components/ui/StatusMessage";
@@ -37,6 +37,7 @@ export function OutputPanel({
   statusRight,
 }: OutputPanelProps) {
   const previewRef = useRef<HTMLDivElement>(null);
+  const [isCopying, setIsCopying] = useState(false);
 
   const handleCopyHtml = async () => {
     // Si estamos en modo preview, copiar el contenido renderizado
@@ -45,32 +46,41 @@ export function OutputPanel({
         // Crear un rango de selección del contenido
         const range = document.createRange();
         range.selectNodeContents(previewRef.current);
-        
+
         // Limpiar cualquier selección existente
         const selection = window.getSelection();
         if (selection) {
           selection.removeAllRanges();
           selection.addRange(range);
-          
+
           // Copiar la selección al portapapeles
           document.execCommand('copy');
-          
+
           // Limpiar la selección
           selection.removeAllRanges();
-          
+
           console.log("HTML renderizado copiado exitosamente");
+          // Mostrar animación de confirmación
+          setIsCopying(true);
+          setTimeout(() => setIsCopying(false), 1500);
         }
       } catch (error) {
         console.error("Error al copiar HTML renderizado:", error);
         // Fallback: copiar el texto HTML
         if (htmlOutput) {
           await navigator.clipboard.writeText(htmlOutput);
+          // Mostrar animación de confirmación
+          setIsCopying(true);
+          setTimeout(() => setIsCopying(false), 1500);
         }
       }
     } else {
       // En modo código, copiar el texto HTML
       if (htmlOutput) {
         await navigator.clipboard.writeText(htmlOutput);
+        // Mostrar animación de confirmación
+        setIsCopying(true);
+        setTimeout(() => setIsCopying(false), 1500);
       }
     }
   };
@@ -101,9 +111,13 @@ export function OutputPanel({
                 <Button
                   onClick={handleCopyHtml}
                   title="Copiar propuesta al portapapeles"
-                  className="bg-gradient-to-r from-[#ff7a7a] to-[#ffb347] text-black font-medium hover:from-[#ff6666] hover:to-[#ff9933]"
+                  className={`font-medium transition-all duration-300 ${
+                    isCopying
+                      ? "bg-gradient-to-r from-green-500 to-green-600 text-white scale-105 animate-pulse"
+                      : "bg-gradient-to-r from-[#ff7a7a] to-[#ffb347] text-black hover:from-[#ff6666] hover:to-[#ff9933]"
+                  }`}
                 >
-                  📋 Copiar Propuesta
+                  {isCopying ? "✅ ¡Copiado!" : "📋 Copiar Propuesta"}
                 </Button>
             )}
         </div>
