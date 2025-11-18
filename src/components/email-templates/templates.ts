@@ -20,7 +20,7 @@ function translateDuration(value?: string) {
     .replace(/month/g, "mes");
 }
 
-function calculatePricePerLicense(plan: QuotationPlan): string {
+function calculateMonthlyPrice(plan: QuotationPlan): string {
   const totalAmount = plan.totalAmountValue || 0;
   const currencySymbol = plan.currencySymbol || "€";
 
@@ -35,20 +35,10 @@ function calculatePricePerLicense(plan: QuotationPlan): string {
     months = parseInt(monthsInlineMatch[1], 10);
   }
 
-  // Intentar obtener cantidad de licencias
-  let quantity = 1;
-  if (plan.quantityText) {
-    const quantityMatch = plan.quantityText.match(/(\d+(?:[.,]\d+)?)/);
-    if (quantityMatch) {
-      quantity = parseFloat(quantityMatch[1].replace(",", "."));
-    }
-  }
-
   months = Math.max(1, months);
-  quantity = Math.max(1, quantity);
 
-  const pricePerLicensePerMonth = totalAmount / months / quantity;
-  return `${pricePerLicensePerMonth.toFixed(2)} ${currencySymbol}`;
+  const monthlyPrice = totalAmount / months;
+  return `${monthlyPrice.toFixed(2)} ${currencySymbol}`;
 }
 
 function formatComments(comments?: string) {
@@ -116,7 +106,7 @@ function buildStyle1Moderno(plans: QuotationPlan[], comments?: string) {
                   ${renderAlignedAmount(plan.totalAmountText || "", "#ffffff")}
                 </div>
                 ${plan.duration ? `<p style="margin: 0px 0px 8px; font-size: 13px; color: rgb(255, 255, 255);">${translateDuration(plan.duration)}</p>` : ''}
-                <p style="margin: 0px; font-size: 12px; color: rgba(255, 255, 255, 0.85);">Precio por licencia: ${escapeHtml(calculatePricePerLicense(plan))}</p>
+                <p style="margin: 0px; font-size: 12px; color: rgba(255, 255, 255, 0.85);">Total mensual: ${escapeHtml(calculateMonthlyPrice(plan))}</p>
               </div>
 
               <div style="background-color: ${isBest ? 'rgb(255, 251, 245)' : 'rgb(254, 254, 254)'}; border: 1px solid ${isBest ? 'rgb(255, 232, 204)' : 'rgb(233, 236, 239)'}; padding: 20px; border-radius: 6px; margin-bottom: 25px;">
@@ -219,8 +209,8 @@ function buildStyle2Compacto(plans: QuotationPlan[], comments?: string) {
           <td style="padding: 8px 0;">${translateDuration(plan.duration)}</td>
         </tr>` : ''}
         <tr>
-          <td style="width: 180px; font-weight: 600; padding: 8px 0;">Precio por Licencia:</td>
-          <td style="padding: 8px 0;">${escapeHtml(calculatePricePerLicense(plan))}</td>
+          <td style="width: 180px; font-weight: 600; padding: 8px 0;">Total Mensual:</td>
+          <td style="padding: 8px 0;">${escapeHtml(calculateMonthlyPrice(plan))}</td>
         </tr>
         ${plan.paymentTerms ? `<tr>
           <td style="width: 180px; font-weight: 600; padding: 8px 0; vertical-align: top;">Condiciones de Pago:</td>
@@ -259,7 +249,7 @@ function buildStyle3Minimalista(plans: QuotationPlan[], comments?: string) {
   const characteristics = [
     { label: "Total Contrato", key: "totalAmountText" },
     { label: "Duración", key: "duration", transform: translateDuration },
-    { label: "Precio por Licencia", key: calculatePricePerLicense },
+    { label: "Total Mensual", key: calculateMonthlyPrice },
     { label: "Cond. de Pago", key: "paymentTerms" },
     { label: "Ahorro total", key: "totalSavingsText" },
     { label: "Ideal para", key: "summaryLine" },
