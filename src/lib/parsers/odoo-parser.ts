@@ -48,46 +48,74 @@ function getSectionText($: CheerioAPI, titleFragment: string): string | undefine
 }
 
 function extractPaymentTerms($: CheerioAPI): string | undefined {
-  // Intentar extraer de la sección "Payment terms" o "Terms & Conditions"
-  let paymentTerms = getSectionText($, "payment terms");
+  // Buscar específicamente la sección con h4 "Payment terms" o "Condiciones de pago"
+  const headers = $("h4").toArray();
   
-  if (!paymentTerms) {
-    // Buscar en h4 directamente y capturar todos los párrafos siguientes
-    const headers = $("h4").toArray();
-    for (const header of headers) {
-      const headerText = cleanText($(header).text()).toLowerCase();
-      if (headerText.includes("payment") || headerText.includes("pago") || headerText.includes("condiciones")) {
-        // Capturar todos los elementos <p> que siguen al h4 hasta el próximo h4 o sección
+  for (const header of headers) {
+    const headerText = cleanText($(header).text()).toLowerCase();
+    
+    // Verificar si es exactamente la sección de condiciones de pago
+    if (
+      headerText === "payment terms" || 
+      headerText === "condiciones de pago" ||
+      headerText === "términos de pago"
+    ) {
+      // Buscar el contenido justo después del hr siguiente
+      const nextHr = $(header).next("hr");
+      if (nextHr.length) {
+        // El contenido está después del <hr>
         const paragraphs: string[] = [];
-        let current = $(header).next();
+        let current = nextHr.next();
         
-        while (current.length && !current.is("h4") && !current.is("section")) {
+        // Capturar párrafos hasta encontrar el siguiente <hr>, <h4>, <section> o botón
+        while (current.length) {
+          if (current.is("hr") || current.is("h4") || current.is("section") || 
+              current.is("a") || current.is("button") || current.hasClass("modal")) {
+            break;
+          }
+          
           if (current.is("p")) {
             const text = cleanText(current.text());
-            if (text) paragraphs.push(text);
+            if (text && !text.toLowerCase().includes("firmar") && 
+                !text.toLowerCase().includes("sign") &&
+                !text.toLowerCase().includes("opinión") &&
+                !text.toLowerCase().includes("rechazar")) {
+              paragraphs.push(text);
+            }
           }
+          
           current = current.next();
         }
         
         if (paragraphs.length > 0) {
-          paymentTerms = paragraphs.join(" ");
-          break;
+          return paragraphs.join(" ");
         }
       }
     }
   }
   
-  if (!paymentTerms) {
-    // Buscar en el HTML por texto que indique términos de pago (capturar múltiples líneas)
-    const allText = $("body").text();
-    // Buscar desde "I hereby agree" hasta capturar las líneas de porcentajes
-    const paymentMatch = allText.match(/(?:I hereby agree that[^]*?(?:NET\d+|upon receipt|a la firma)[^]*?)(?=\n\n|\n[A-Z][a-z]+\s|$)/i);
-    if (paymentMatch) {
-      paymentTerms = cleanText(paymentMatch[0]);
+  // Fallback: buscar en section con id o class específico
+  const paymentSection = $("section").filter(function() {
+    const title = $(this).find("h4").first().text().toLowerCase();
+    return title.includes("payment") || title.includes("condiciones de pago");
+  });
+  
+  if (paymentSection.length) {
+    const paragraphs = paymentSection.find("p")
+      .toArray()
+      .map(p => cleanText($(p).text()))
+      .filter(text => text && 
+        !text.toLowerCase().includes("firmar") && 
+        !text.toLowerCase().includes("sign") &&
+        !text.toLowerCase().includes("opinión") &&
+        !text.toLowerCase().includes("rechazar"));
+    
+    if (paragraphs.length > 0) {
+      return paragraphs.join(" ");
     }
   }
   
-  return paymentTerms;
+  return undefined;
 }
 
 function deriveDurationText(planLabel?: string, expirationDate?: string): string | undefined {
