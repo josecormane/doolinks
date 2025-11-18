@@ -4,6 +4,11 @@ import type { Element } from "domhandler";
 import { QuotationParseResult } from "../types/quotation";
 import { cleanText, parseLocalizedNumber, formatCurrencyValue } from "./currency-utils";
 
+const DEFAULT_PAYMENT_TERMS = "1 Pago por adelantado a la firma";
+const PAYMENT_DISCLAIMER_PATTERNS = [
+  /I hereby agree that I will be invoiced upon order acceptation and I will pay(?: the invoice within [^.\n]+)?\.?/gi,
+];
+
 function findTableValue($: CheerioAPI, table: Cheerio<Element>, label: string): string | undefined {
   if (!table || !table.length) return undefined;
   const rows = table.find("tr").toArray();
@@ -148,6 +153,31 @@ function extractPaymentTerms($: CheerioAPI): string | undefined {
   }
   
   return undefined;
+}
+
+function sanitizePaymentTerms(rawText?: string): string | undefined {
+  if (!rawText) return undefined;
+
+  let withoutDisclaimer = rawText;
+  for (const pattern of PAYMENT_DISCLAIMER_PATTERNS) {
+    withoutDisclaimer = withoutDisclaimer.replace(pattern, "\n");
+  }
+
+  withoutDisclaimer = withoutDisclaimer
+    .replace(/\n{2,}/g, "\n")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n[ \t]+/g, "\n")
+    .trim();
+
+  if (!withoutDisclaimer) return undefined;
+
+  const normalized = withoutDisclaimer
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .join("\n");
+
+  return normalized || undefined;
 }
 
 function deriveDurationText(planLabel?: string, expirationDate?: string): string | undefined {
@@ -334,7 +364,9 @@ export function parseQuotationHtml(
       : undefined;
   console.log(`[Parser] Texto de ahorros totales:`, totalSavingsText);
 
-  const paymentTerms = extractPaymentTerms($);
+  const rawPaymentTerms = extractPaymentTerms($);
+  const sanitizedPaymentTerms = sanitizePaymentTerms(rawPaymentTerms);
+  const paymentTerms = sanitizedPaymentTerms || DEFAULT_PAYMENT_TERMS;
   console.log(`[Parser] Términos de pago encontrados:`, paymentTerms);
   
   const duration = deriveDurationText(planLabel, expirationDate);
