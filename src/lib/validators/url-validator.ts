@@ -1,5 +1,5 @@
 const ODOO_URL_REGEX =
-  /^https:\/\/(?:www\.)?odoo\.com\/my\/orders\/\d+(?:\?.*)?$/i;
+  /^https:\/\/(?:www\.)?odoo\.com(?:\/[a-z]{2}_[A-Z]{2})?\/my\/orders\/\d+(?:\?.*)?$/i;
 
 export function isValidQuotationUrl(value: string): boolean {
   return ODOO_URL_REGEX.test((value || "").trim());
