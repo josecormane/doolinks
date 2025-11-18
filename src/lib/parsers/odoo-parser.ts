@@ -47,6 +47,16 @@ function getSectionText($: CheerioAPI, titleFragment: string): string | undefine
   return undefined;
 }
 
+function normalizeParagraphText(element: Cheerio<Element>): string {
+  const html = element.html() || "";
+  const withLineBreaks = html.replace(/<br\s*\/?>/gi, "\n");
+  return withLineBreaks
+    .split("\n")
+    .map((line) => cleanText(line))
+    .filter(Boolean)
+    .join("\n");
+}
+
 function extractPaymentTerms($: CheerioAPI): string | undefined {
   // Buscar específicamente la sección con h4 "Payment terms" o "Condiciones de pago"
   const headers = $("h4").toArray();
@@ -75,7 +85,7 @@ function extractPaymentTerms($: CheerioAPI): string | undefined {
           }
           
           if (current.is("p")) {
-            const text = cleanText(current.text());
+            const text = normalizeParagraphText(current);
             if (text && !text.toLowerCase().includes("firmar") && 
                 !text.toLowerCase().includes("sign") &&
                 !text.toLowerCase().includes("opinión") &&
@@ -114,7 +124,7 @@ function extractPaymentTerms($: CheerioAPI): string | undefined {
   if (paymentSection.length) {
     const paragraphs = paymentSection.find("p")
       .toArray()
-      .map(p => cleanText($(p).text()))
+      .map((p) => normalizeParagraphText($(p)))
       .filter(text => text && 
         !text.toLowerCase().includes("firmar") && 
         !text.toLowerCase().includes("sign") &&
