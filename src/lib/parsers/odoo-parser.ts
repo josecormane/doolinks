@@ -88,7 +88,13 @@ function extractPaymentTerms($: CheerioAPI): string | undefined {
         }
         
         if (paragraphs.length > 0) {
-          return paragraphs.join(" ");
+          // Unir párrafos con salto de línea si terminan en punto, de lo contrario con espacio
+          return paragraphs.map((p, idx) => {
+            if (idx < paragraphs.length - 1 && p.endsWith('.')) {
+              return p + '\n';
+            }
+            return p;
+          }).join(' ').trim();
         }
       }
     }
@@ -111,7 +117,13 @@ function extractPaymentTerms($: CheerioAPI): string | undefined {
         !text.toLowerCase().includes("rechazar"));
     
     if (paragraphs.length > 0) {
-      return paragraphs.join(" ");
+      // Unir párrafos con salto de línea si terminan en punto, de lo contrario con espacio
+      return paragraphs.map((p, idx) => {
+        if (idx < paragraphs.length - 1 && p.endsWith('.')) {
+          return p + '\n';
+        }
+        return p;
+      }).join(' ').trim();
     }
   }
   

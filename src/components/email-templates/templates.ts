@@ -122,7 +122,7 @@ function buildStyle1Moderno(plans: QuotationPlan[], comments?: string) {
               <div style="background-color: ${isBest ? 'rgb(255, 251, 245)' : 'rgb(254, 254, 254)'}; border: 1px solid ${isBest ? 'rgb(255, 232, 204)' : 'rgb(233, 236, 239)'}; padding: 20px; border-radius: 6px; margin-bottom: 25px;">
                 ${plan.paymentTerms ? `
                   <p style="margin: 0px 0px 5px; font-size: 12px; color: ${isBest ? 'rgb(133, 100, 4)' : 'rgb(108, 117, 125)'}; font-weight: 600; text-transform: uppercase; text-align: center;">💎 Condiciones de Pago</p>
-                  <p style="margin: 0px 0px 18px; font-size: 13px; color: ${isBest ? 'rgb(133, 100, 4)' : 'rgb(73, 80, 87)'}; text-align: center;">${escapeHtml(plan.paymentTerms)}</p>
+                  <p style="margin: 0px 0px 18px; font-size: 13px; color: ${isBest ? 'rgb(133, 100, 4)' : 'rgb(73, 80, 87)'}; text-align: center; white-space: pre-line;">${escapeHtml(plan.paymentTerms)}</p>
                   <div style="border-top: 1px solid ${isBest ? 'rgb(255, 232, 204)' : 'rgb(233, 236, 239)'}; margin: 0px 0px 18px;"></div>
                 ` : ''}
 
@@ -224,7 +224,7 @@ function buildStyle2Compacto(plans: QuotationPlan[], comments?: string) {
         </tr>
         ${plan.paymentTerms ? `<tr>
           <td style="width: 180px; font-weight: 600; padding: 8px 0; vertical-align: top;">Condiciones de Pago:</td>
-          <td style="padding: 8px 0;">${escapeHtml(plan.paymentTerms)}</td>
+          <td style="padding: 8px 0; white-space: pre-line;">${escapeHtml(plan.paymentTerms)}</td>
         </tr>` : ''}
         ${plan.totalSavingsText ? `<tr>
           <td style="width: 180px; font-weight: 600; padding: 8px 0;">Ahorro total:</td>
@@ -273,7 +273,9 @@ function buildStyle3Minimalista(plans: QuotationPlan[], comments?: string) {
           if (char.transform && value) {
             value = char.transform(value);
           }
-          return `<td style="padding: 10px 15px; border-bottom: 1px solid #e0e0e0;">${escapeHtml(value || "")}</td>`;
+          // Agregar white-space: pre-line para condiciones de pago
+          const extraStyle = char.key === "paymentTerms" ? " white-space: pre-line;" : "";
+          return `<td style="padding: 10px 15px; border-bottom: 1px solid #e0e0e0;${extraStyle}">${escapeHtml(value || "")}</td>`;
         })
         .join("");
 
