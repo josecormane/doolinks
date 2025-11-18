@@ -77,7 +77,7 @@ export function LinkInputs({ linkCount, urls, errors, planNames, idealFor, onUrl
                   🔗 URL de cotización Odoo
                 </label>
                 <Input
-                  placeholder="https://www.odoo.com/my/orders/..."
+                  placeholder="https://www.odoo.com/my/orders/... o /mail/view?..."
                   value={urls[idx] || ""}
                   onChange={(event) => onUrlChange(idx, event.target.value)}
                   error={errors[idx]}

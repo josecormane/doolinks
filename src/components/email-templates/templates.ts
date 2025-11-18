@@ -120,9 +120,11 @@ function buildStyle1Moderno(plans: QuotationPlan[], comments?: string) {
               </div>
 
               <div style="background-color: ${isBest ? 'rgb(255, 251, 245)' : 'rgb(254, 254, 254)'}; border: 1px solid ${isBest ? 'rgb(255, 232, 204)' : 'rgb(233, 236, 239)'}; padding: 20px; border-radius: 6px; margin-bottom: 25px;">
-                <p style="margin: 0px 0px 5px; font-size: 12px; color: ${isBest ? 'rgb(133, 100, 4)' : 'rgb(108, 117, 125)'}; font-weight: 600; text-transform: uppercase; text-align: center;">💎 Condiciones de Pago</p>
-                <p style="margin: 0px 0px 18px; font-size: 13px; color: ${isBest ? 'rgb(133, 100, 4)' : 'rgb(73, 80, 87)'}; text-align: center;">1 Pago por adelantado a la firma</p>
-                <div style="border-top: 1px solid ${isBest ? 'rgb(255, 232, 204)' : 'rgb(233, 236, 239)'}; margin: 0px 0px 18px;"></div>
+                ${plan.paymentTerms ? `
+                  <p style="margin: 0px 0px 5px; font-size: 12px; color: ${isBest ? 'rgb(133, 100, 4)' : 'rgb(108, 117, 125)'}; font-weight: 600; text-transform: uppercase; text-align: center;">💎 Condiciones de Pago</p>
+                  <p style="margin: 0px 0px 18px; font-size: 13px; color: ${isBest ? 'rgb(133, 100, 4)' : 'rgb(73, 80, 87)'}; text-align: center;">${escapeHtml(plan.paymentTerms)}</p>
+                  <div style="border-top: 1px solid ${isBest ? 'rgb(255, 232, 204)' : 'rgb(233, 236, 239)'}; margin: 0px 0px 18px;"></div>
+                ` : ''}
 
                 ${plan.totalSavingsText ? `
                   <p style="margin: 0px 0px 8px; font-size: 13px; color: ${isBest ? 'rgb(133, 100, 4)' : 'rgb(108, 117, 125)'}; font-weight: 600; text-align: center;">💰 Ahorro total</p>
@@ -220,10 +222,10 @@ function buildStyle2Compacto(plans: QuotationPlan[], comments?: string) {
           <td style="width: 180px; font-weight: 600; padding: 8px 0;">Precio por Licencia:</td>
           <td style="padding: 8px 0;">${escapeHtml(calculatePricePerLicense(plan))}</td>
         </tr>
-        <tr>
+        ${plan.paymentTerms ? `<tr>
           <td style="width: 180px; font-weight: 600; padding: 8px 0; vertical-align: top;">Condiciones de Pago:</td>
-          <td style="padding: 8px 0;">1 Pago por adelantado a la firma</td>
-        </tr>
+          <td style="padding: 8px 0;">${escapeHtml(plan.paymentTerms)}</td>
+        </tr>` : ''}
         ${plan.totalSavingsText ? `<tr>
           <td style="width: 180px; font-weight: 600; padding: 8px 0;">Ahorro total:</td>
           <td style="padding: 8px 0; font-weight: 600; color: #047857;">${escapeHtml(plan.totalSavingsText)}</td>
@@ -258,7 +260,7 @@ function buildStyle3Minimalista(plans: QuotationPlan[], comments?: string) {
     { label: "Total Contrato", key: "totalAmountText" },
     { label: "Duración", key: "duration", transform: translateDuration },
     { label: "Precio por Licencia", key: calculatePricePerLicense },
-    { label: "Cond. de Pago", key: () => "1 Pago por adelantado a la firma" },
+    { label: "Cond. de Pago", key: "paymentTerms" },
     { label: "Ahorro total", key: "totalSavingsText" },
     { label: "Ideal para", key: "summaryLine" },
   ];

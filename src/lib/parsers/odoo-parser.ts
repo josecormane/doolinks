@@ -47,6 +47,37 @@ function getSectionText($: CheerioAPI, titleFragment: string): string | undefine
   return undefined;
 }
 
+function extractPaymentTerms($: CheerioAPI): string | undefined {
+  // Intentar extraer de la sección "Payment terms" o "Terms & Conditions"
+  let paymentTerms = getSectionText($, "payment terms");
+  
+  if (!paymentTerms) {
+    // Buscar en h4 directamente
+    const headers = $("h4").toArray();
+    for (const header of headers) {
+      const headerText = cleanText($(header).text()).toLowerCase();
+      if (headerText.includes("payment") || headerText.includes("pago")) {
+        const nextP = $(header).next("p");
+        if (nextP.length) {
+          paymentTerms = cleanText(nextP.text());
+          if (paymentTerms) break;
+        }
+      }
+    }
+  }
+  
+  if (!paymentTerms) {
+    // Buscar en el HTML por texto que indique términos de pago
+    const allText = $("body").text();
+    const paymentMatch = allText.match(/(?:I hereby agree that.*?(?:pay|invoice)[^.]*\.)/is);
+    if (paymentMatch) {
+      paymentTerms = cleanText(paymentMatch[0]);
+    }
+  }
+  
+  return paymentTerms;
+}
+
 function deriveDurationText(planLabel?: string, expirationDate?: string): string | undefined {
   const plan = cleanText(planLabel);
   if (plan) {
@@ -231,7 +262,7 @@ export function parseQuotationHtml(
       : undefined;
   console.log(`[Parser] Texto de ahorros totales:`, totalSavingsText);
 
-  const paymentTerms = getSectionText($, "payment terms");
+  const paymentTerms = extractPaymentTerms($);
   console.log(`[Parser] Términos de pago encontrados:`, paymentTerms);
   
   const duration = deriveDurationText(planLabel, expirationDate);
