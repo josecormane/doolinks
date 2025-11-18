@@ -88,13 +88,18 @@ function extractPaymentTerms($: CheerioAPI): string | undefined {
         }
         
         if (paragraphs.length > 0) {
-          // Unir párrafos con salto de línea si terminan en punto, de lo contrario con espacio
-          return paragraphs.map((p, idx) => {
-            if (idx < paragraphs.length - 1 && p.endsWith('.')) {
-              return p + '\n';
+          // Unir párrafos: si termina en punto, agregar salto de línea; si no, agregar espacio
+          let result = '';
+          for (let i = 0; i < paragraphs.length; i++) {
+            const p = paragraphs[i];
+            result += p;
+            if (i < paragraphs.length - 1) {
+              // Si el párrafo actual termina en punto, agregar salto de línea
+              // Si no, agregar espacio
+              result += p.endsWith('.') ? '\n' : ' ';
             }
-            return p;
-          }).join(' ').trim();
+          }
+          return result;
         }
       }
     }
@@ -117,13 +122,18 @@ function extractPaymentTerms($: CheerioAPI): string | undefined {
         !text.toLowerCase().includes("rechazar"));
     
     if (paragraphs.length > 0) {
-      // Unir párrafos con salto de línea si terminan en punto, de lo contrario con espacio
-      return paragraphs.map((p, idx) => {
-        if (idx < paragraphs.length - 1 && p.endsWith('.')) {
-          return p + '\n';
+      // Unir párrafos: si termina en punto, agregar salto de línea; si no, agregar espacio
+      let result = '';
+      for (let i = 0; i < paragraphs.length; i++) {
+        const p = paragraphs[i];
+        result += p;
+        if (i < paragraphs.length - 1) {
+          // Si el párrafo actual termina en punto, agregar salto de línea
+          // Si no, agregar espacio
+          result += p.endsWith('.') ? '\n' : ' ';
         }
-        return p;
-      }).join(' ').trim();
+      }
+      return result;
     }
   }
   
