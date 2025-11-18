@@ -52,24 +52,36 @@ function extractPaymentTerms($: CheerioAPI): string | undefined {
   let paymentTerms = getSectionText($, "payment terms");
   
   if (!paymentTerms) {
-    // Buscar en h4 directamente
+    // Buscar en h4 directamente y capturar todos los párrafos siguientes
     const headers = $("h4").toArray();
     for (const header of headers) {
       const headerText = cleanText($(header).text()).toLowerCase();
-      if (headerText.includes("payment") || headerText.includes("pago")) {
-        const nextP = $(header).next("p");
-        if (nextP.length) {
-          paymentTerms = cleanText(nextP.text());
-          if (paymentTerms) break;
+      if (headerText.includes("payment") || headerText.includes("pago") || headerText.includes("condiciones")) {
+        // Capturar todos los elementos <p> que siguen al h4 hasta el próximo h4 o sección
+        const paragraphs: string[] = [];
+        let current = $(header).next();
+        
+        while (current.length && !current.is("h4") && !current.is("section")) {
+          if (current.is("p")) {
+            const text = cleanText(current.text());
+            if (text) paragraphs.push(text);
+          }
+          current = current.next();
+        }
+        
+        if (paragraphs.length > 0) {
+          paymentTerms = paragraphs.join(" ");
+          break;
         }
       }
     }
   }
   
   if (!paymentTerms) {
-    // Buscar en el HTML por texto que indique términos de pago
+    // Buscar en el HTML por texto que indique términos de pago (capturar múltiples líneas)
     const allText = $("body").text();
-    const paymentMatch = allText.match(/(?:I hereby agree that.*?(?:pay|invoice)[^.]*\.)/is);
+    // Buscar desde "I hereby agree" hasta capturar las líneas de porcentajes
+    const paymentMatch = allText.match(/(?:I hereby agree that[^]*?(?:NET\d+|upon receipt|a la firma)[^]*?)(?=\n\n|\n[A-Z][a-z]+\s|$)/i);
     if (paymentMatch) {
       paymentTerms = cleanText(paymentMatch[0]);
     }
