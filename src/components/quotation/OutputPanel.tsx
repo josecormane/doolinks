@@ -17,6 +17,8 @@ interface OutputPanelProps {
   style: StyleVariant;
   onStyleChange(value: StyleVariant): void;
   comments: string;
+  bestChoiceIndex?: number | null;
+  bestChoiceLabel?: string;
   statusMessage: string;
   statusRight?: string;
   statusVariant: "neutral" | "success" | "error";
@@ -32,6 +34,8 @@ export function OutputPanel({
   style,
   onStyleChange,
   comments,
+  bestChoiceIndex,
+  bestChoiceLabel,
   statusMessage,
   statusVariant,
   statusRight,
@@ -132,7 +136,13 @@ export function OutputPanel({
           />
         ) : plans.length ? (
           <div ref={previewRef} className="h-full rounded-xl bg-white overflow-auto">
-            <EmailPreview style={style} plans={plans} comments={comments} />
+            <EmailPreview 
+              style={style} 
+              plans={plans} 
+              comments={comments}
+              bestChoiceIndex={bestChoiceIndex}
+              bestChoiceLabel={bestChoiceLabel}
+            />
           </div>
         ) : (
           <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-white/20 text-sm text-white/60">

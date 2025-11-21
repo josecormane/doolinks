@@ -12,10 +12,15 @@ interface EmailPreviewProps {
   style: StyleVariant;
   plans: QuotationPlan[];
   comments?: string;
+  bestChoiceIndex?: number | null;
+  bestChoiceLabel?: string;
 }
 
-export function EmailPreview({ style, plans, comments }: EmailPreviewProps) {
-  const html = useMemo(() => buildEmailBody(style, plans, comments), [style, plans, comments]);
+export function EmailPreview({ style, plans, comments, bestChoiceIndex, bestChoiceLabel }: EmailPreviewProps) {
+  const html = useMemo(
+    () => buildEmailBody(style, plans, comments, bestChoiceIndex, bestChoiceLabel),
+    [style, plans, comments, bestChoiceIndex, bestChoiceLabel]
+  );
 
   return (
     <div
@@ -25,8 +30,13 @@ export function EmailPreview({ style, plans, comments }: EmailPreviewProps) {
   );
 }
 
-export function generateEmailHtml(style: StyleVariant, plans: QuotationPlan[], comments?: string) {
-  const body = buildEmailBody(style, plans, comments);
+export function generateEmailHtml(
+  style: StyleVariant,
+  plans: QuotationPlan[],
+  comments?: string,
+  bestChoiceIndex: number | null = 1,
+  bestChoiceLabel: string = "⭐ MÁS ELEGIDO ⭐"
+) {
+  const body = buildEmailBody(style, plans, comments, bestChoiceIndex, bestChoiceLabel);
   return buildFullHtml(body);
 }
-

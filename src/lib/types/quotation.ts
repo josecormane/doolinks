@@ -12,9 +12,13 @@ export interface QuotationPlan {
   expirationDate?: string;
   totalAmountText?: string;
   totalAmountValue?: number;
+  untaxedAmountText?: string;
+  untaxedAmountValue?: number;
   currencySymbol?: string;
   pricePerLicenseText?: string;
   quantityText?: string;
+  totalUsers?: number;
+  licensingSubtotal?: number;
   mainProduct?: string;
   paymentTerms?: string;
   totalSavingsText?: string;

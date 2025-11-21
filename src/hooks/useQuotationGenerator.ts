@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { generateEmailHtml, StyleVariant } from "@/components/email-templates/EmailPreview";
 import { QuotationPlan } from "@/lib/types/quotation";
@@ -25,6 +25,8 @@ export function useQuotationGenerator() {
     "La inversión más equilibrada",
     "Más ahorro, retorno más rápido"
   ]);
+  const [bestChoiceIndex, setBestChoiceIndex] = useState<number | null>(1);
+  const [bestChoiceLabel, setBestChoiceLabel] = useState("⭐ MÁS ELEGIDO ⭐");
   const [comments, setComments] = useState("");
   const [plans, setPlans] = useState<QuotationPlan[]>([]);
   const [htmlOutput, setHtmlOutput] = useState("");
@@ -63,6 +65,33 @@ export function useQuotationGenerator() {
     });
   }, []);
 
+  // Calcular los planes efectivos combinando los datos base con los inputs actuales
+  const effectivePlans = useMemo(() => {
+    return plans.map((plan, idx) => ({
+      ...plan,
+      // Si hay un nombre personalizado en el input, usarlo. Si no, mantener el que viene del plan (o fetch)
+      title: planNames[idx] || plan.title,
+      summaryLine: idealFor[idx] || plan.summaryLine,
+    }));
+  }, [plans, planNames, idealFor]);
+
+  // Regenerar HTML automáticamente cuando cambian los datos o configuraciones
+  useEffect(() => {
+    if (effectivePlans.length === 0) return;
+
+    try {
+      const generatedHtml = generateEmailHtml(style, effectivePlans, comments, bestChoiceIndex, bestChoiceLabel);
+      setHtmlOutput(generatedHtml);
+      
+      // Actualizar mensaje de estado discretamente si no estamos cargando
+      if (!loading) {
+         setStatusRight(`${effectivePlans.length} plan(es) | ${STYLE_LABELS[style]}`);
+      }
+    } catch (error) {
+      console.error("Error generando HTML:", error);
+    }
+  }, [effectivePlans, style, comments, bestChoiceIndex, bestChoiceLabel, loading]);
+
 
   const handleGenerate = useCallback(async () => {
     if (!validateUrls(urlsToUse)) {
@@ -77,7 +106,16 @@ export function useQuotationGenerator() {
     setStatusRight("");
 
     try {
-      const payload = { urls: urlsToUse.map((url) => url.trim()) };
+      const payload = {
+        urls: urlsToUse.map((url) => {
+          const trimmed = url.trim();
+          // Ensure protocol exists
+          if (!/^https?:\/\//i.test(trimmed)) {
+            return `https://${trimmed}`;
+          }
+          return trimmed;
+        }),
+      };
       const response = await fetch("/api/fetch-quotation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -91,7 +129,8 @@ export function useQuotationGenerator() {
 
       const data = (await response.json()) as { plans: QuotationPlan[] };
       
-      // Apply custom plan names and idealFor
+      // Guardamos los planes tal cual vienen del server (o con un primer pase de nombres)
+      // El useMemo 'effectivePlans' se encargará de mantenerlos sincronizados con los inputs
       const plansWithCustomFields = data.plans.map((plan, idx) => ({
         ...plan,
         title: planNames[idx] || plan.title,
@@ -99,21 +138,19 @@ export function useQuotationGenerator() {
       }));
       
       setPlans(plansWithCustomFields);
-
-      const generatedHtml = generateEmailHtml(style, plansWithCustomFields, comments);
-      setHtmlOutput(generatedHtml);
-      setStatusMessage("HTML generado exitosamente.");
+      // Nota: No necesitamos llamar a setHtmlOutput aquí porque el useEffect lo hará al cambiar 'plans'
+      
+      setStatusMessage("Datos obtenidos exitosamente.");
       setStatusVariant("success");
-      setStatusRight(`${data.plans.length} plan(es) | ${STYLE_LABELS[style]}`);
     } catch (error) {
       setStatusMessage(
-        (error as Error)?.message || "Algo salió mal al generar el HTML. Revisa la consola del navegador."
+        (error as Error)?.message || "Algo salió mal al obtener los datos. Revisa la consola."
       );
       setStatusVariant("error");
     } finally {
       setLoading(false);
     }
-  }, [urlsToUse, style, comments, validateUrls]);
+  }, [urlsToUse, validateUrls, planNames, idealFor]);
 
   return {
     linkCount,
@@ -125,13 +162,17 @@ export function useQuotationGenerator() {
     idealFor,
     updatePlanName,
     updateIdealFor,
+    bestChoiceIndex,
+    setBestChoiceIndex,
+    bestChoiceLabel,
+    setBestChoiceLabel,
     errors,
     comments,
     setComments,
     updateUrl,
     handleGenerate,
     loading,
-    plans,
+    plans: effectivePlans, // Devolvemos los planes efectivos para que la UI los muestre si es necesario
     htmlOutput,
     setHtmlOutput,
     viewMode,
@@ -141,4 +182,3 @@ export function useQuotationGenerator() {
     statusRight,
   };
 }
-

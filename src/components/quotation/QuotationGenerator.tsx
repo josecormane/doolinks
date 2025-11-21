@@ -19,6 +19,10 @@ export function QuotationGenerator() {
       idealFor,
       updatePlanName,
       updateIdealFor,
+      bestChoiceIndex,
+      setBestChoiceIndex,
+      bestChoiceLabel,
+      setBestChoiceLabel,
       errors,
       comments,
       setComments,
@@ -72,6 +76,10 @@ export function QuotationGenerator() {
           onUrlChange={updateUrl}
           onPlanNameChange={updatePlanName}
           onIdealForChange={updateIdealFor}
+          bestChoiceIndex={bestChoiceIndex}
+          onBestChoiceIndexChange={setBestChoiceIndex}
+          bestChoiceLabel={bestChoiceLabel}
+          onBestChoiceLabelChange={setBestChoiceLabel}
           comments={comments}
           onCommentsChange={setComments}
           onGenerate={handleGenerate}
@@ -88,6 +96,8 @@ export function QuotationGenerator() {
             style={style}
             onStyleChange={(value) => setStyle(value as StyleVariant)}
             comments={comments}
+            bestChoiceIndex={bestChoiceIndex}
+            bestChoiceLabel={bestChoiceLabel}
             statusMessage={statusMessage}
             statusVariant={statusVariant}
             statusRight={statusRight}

@@ -312,6 +312,20 @@ export function parseQuotationHtml(
   const reference = findTableValue($, subscriptionTable, "Reference");
   console.log(`[Parser] Referencia encontrada:`, reference);
 
+  // Primero obtener el símbolo de moneda desde el importe base (sin impuestos)
+  const untaxedSpan = $(
+    'table[name="sale_order_totals_table"] tr.o_subtotal span.oe_currency_value'
+  ).first();
+  
+  let untaxedInfo: MonetaryParts = { text: undefined, value: undefined, symbol: undefined };
+  if (untaxedSpan.length) {
+     untaxedInfo = extractMonetaryParts(untaxedSpan);
+     console.log(`[Parser] Importe base encontrado:`, untaxedInfo);
+  } else {
+     console.log(`[Parser] No se encontró importe base con clase o_subtotal`);
+  }
+  
+  // Obtener el total con impuestos
   const totalSpan = $(
     'table[name="sale_order_totals_table"] tr.o_total span.oe_currency_value'
   ).first();
@@ -324,7 +338,8 @@ export function parseQuotationHtml(
     symbol: totalInfo.symbol
   });
   
-  const fallbackCurrency = totalInfo.symbol || "€";
+  // Usar el símbolo del importe base si está disponible, sino del total
+  const fallbackCurrency = untaxedInfo.symbol || totalInfo.symbol || "€";
   console.log(`[Parser] Símbolo de moneda a usar:`, fallbackCurrency);
 
   const lineItems = parseLineItems($);
@@ -349,8 +364,39 @@ export function parseQuotationHtml(
   const discountLines = lineItems.filter((line) => (line.amountValue || 0) < 0);
   console.log(`[Parser] Líneas positivas: ${positiveLines.length}, Líneas de descuento: ${discountLines.length}`);
   
-  const mainLine = positiveLines[0] || lineItems[0];
+  // Filtrar líneas de licencias: excluir servicios hosting (odoo.sh, servidor sh)
+  const licensingLines = lineItems.filter((line) => {
+    const nameLower = (line.name || "").toLowerCase();
+    return (
+      !nameLower.includes("servidor sh") &&
+      !nameLower.includes("odoo.sh") &&
+      !nameLower.includes("server") &&
+      !nameLower.includes("hosting")
+    );
+  });
+  
+  console.log(`[Parser] Líneas de licencias (incluyendo descuentos):`, licensingLines.length);
+  
+  // Calcular el subtotal de licencias (suma de todas las líneas de licencias, incluyendo descuentos negativos)
+  const licensingSubtotal = licensingLines.reduce((sum, line) => {
+    return sum + (line.amountValue || 0);
+  }, 0);
+  console.log(`[Parser] Subtotal de licencias:`, licensingSubtotal);
+  
+  // Línea principal para mostrar (primera línea positiva de licencias)
+  const mainProductLines = licensingLines.filter((line) => (line.amountValue || 0) > 0);
+  const mainLine = mainProductLines[0] || positiveLines[0] || lineItems[0];
   console.log(`[Parser] Línea principal seleccionada:`, mainLine?.name);
+  
+  // Calcular usuarios totales solo de las líneas de licencias principales (positivas)
+  const totalUsers = mainProductLines.reduce((sum, line) => {
+    const unit = (line.quantityDisplay || "").toLowerCase();
+    if (unit.includes("usuario") || unit.includes("user")) {
+      return sum + (line.quantityValue || 0);
+    }
+    return sum;
+  }, 0);
+  console.log(`[Parser] Total de usuarios encontrados:`, totalUsers);
 
   const totalSavingsValue = discountLines.reduce((acc, line) => {
     const value = Math.abs(line.amountValue || 0);
@@ -381,9 +427,13 @@ export function parseQuotationHtml(
     expirationDate,
     totalAmountText: totalInfo.text,
     totalAmountValue: totalInfo.value ?? undefined,
+    untaxedAmountText: untaxedInfo.text,
+    untaxedAmountValue: untaxedInfo.value ?? undefined,
     currencySymbol: fallbackCurrency,
     pricePerLicenseText: mainLine?.unitPriceText,
     quantityText: mainLine?.quantityDisplay,
+    totalUsers: totalUsers > 0 ? totalUsers : undefined,
+    licensingSubtotal: licensingSubtotal || undefined,
     mainProduct: mainLine?.name,
     paymentTerms,
     totalSavingsText,

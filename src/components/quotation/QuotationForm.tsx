@@ -6,7 +6,7 @@ import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { LinkInputs } from "./LinkInputs";
 
-interface QuotationFormProps {
+  interface QuotationFormProps {
   linkCount: number;
   onLinkCountChange(value: number): void;
   urls: string[];
@@ -16,6 +16,10 @@ interface QuotationFormProps {
   onUrlChange(index: number, value: string): void;
   onPlanNameChange(index: number, value: string): void;
   onIdealForChange(index: number, value: string): void;
+  bestChoiceIndex: number | null;
+  onBestChoiceIndexChange(value: number | null): void;
+  bestChoiceLabel: string;
+  onBestChoiceLabelChange(value: string): void;
   comments: string;
   onCommentsChange(value: string): void;
   onGenerate(): void;
@@ -32,6 +36,10 @@ export function QuotationForm({
   onUrlChange,
   onPlanNameChange,
   onIdealForChange,
+  bestChoiceIndex,
+  onBestChoiceIndexChange,
+  bestChoiceLabel,
+  onBestChoiceLabelChange,
   comments,
   onCommentsChange,
   onGenerate,
@@ -70,7 +78,20 @@ export function QuotationForm({
             <span className="text-xs font-medium text-white/80">🔗 Propuestas</span>
             <span className="rounded px-2 py-1 text-[11px] bg-white/10 text-white/60">Nombres editables</span>
           </div>
-          <LinkInputs linkCount={linkCount} urls={urls} planNames={planNames} idealFor={idealFor} errors={errors} onUrlChange={onUrlChange} onPlanNameChange={onPlanNameChange} onIdealForChange={onIdealForChange} />
+          <LinkInputs 
+            linkCount={linkCount} 
+            urls={urls} 
+            planNames={planNames} 
+            idealFor={idealFor} 
+            errors={errors} 
+            onUrlChange={onUrlChange} 
+            onPlanNameChange={onPlanNameChange} 
+            onIdealForChange={onIdealForChange}
+            bestChoiceIndex={bestChoiceIndex}
+            onBestChoiceIndexChange={onBestChoiceIndexChange}
+            bestChoiceLabel={bestChoiceLabel}
+            onBestChoiceLabelChange={onBestChoiceLabelChange}
+          />
           <p className="text-xs text-white/50">
             * URLs de Odoo: <code className="bg-white/5 px-1 py-0.5 rounded text-[11px]">https://odoo.com/my/orders/...</code>
           </p>

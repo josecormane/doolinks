@@ -20,9 +20,12 @@ function translateDuration(value?: string) {
     .replace(/month/g, "mes");
 }
 
-function calculateMonthlyPrice(plan: QuotationPlan): string {
-  const totalAmount = plan.totalAmountValue || 0;
+function calculateCostPerUserMonth(plan: QuotationPlan): string {
+  // Usar el subtotal de licencias si está disponible (excluye servicios hosting)
+  // Si no, usar el importe sin impuestos, y finalmente el total
+  const baseAmount = plan.licensingSubtotal || plan.untaxedAmountValue || plan.totalAmountValue || 0;
   const currencySymbol = plan.currencySymbol || "€";
+  const users = plan.totalUsers || 1;
 
   // Intentar obtener los meses desde la duración (maneja inglés y español)
   const durationText = plan.duration || "";
@@ -37,8 +40,9 @@ function calculateMonthlyPrice(plan: QuotationPlan): string {
 
   months = Math.max(1, months);
 
-  const monthlyPrice = totalAmount / months;
-  return `${monthlyPrice.toFixed(2)} ${currencySymbol}`;
+  // Calcular coste por usuario por mes
+  const costPerUserMonth = baseAmount / (months * users);
+  return `${costPerUserMonth.toFixed(2)} ${currencySymbol}`;
 }
 
 function formatComments(comments?: string) {
@@ -53,28 +57,42 @@ function disclaimer() {
   </div>`;
 }
 
-// Renderiza el total con el símbolo de moneda alineado de forma consistente
-// Usa una pequeña tabla inline para máxima compatibilidad entre clientes de email.
-function renderAlignedAmount(amountText?: string, textColor: string = "#ffffff") {
+function renderAlignedAmount(amountText?: string, textColor: string = "#ffffff", showIVASuffix: boolean = false) {
   if (!amountText) {
     return "";
   }
   const trimmed = amountText.trim();
-  // Captura la parte numérica y el símbolo al final (p.e. "1.234,56 €")
-  const match = trimmed.match(/^(.+?)\s*([^\d\s]+)$/);
-  const numberPart = match ? match[1] : trimmed;
-  const symbolPart = match ? match[2] : "€";
+  
+  // Capturar símbolo al principio (US$, $, etc.) o al final (€, etc.)
+  let numberPart = "";
+  let symbolPart = "";
+  
+  // Intentar capturar símbolo al inicio primero (ej: US$ 3.010,68)
+  const prefixMatch = trimmed.match(/^([A-Z]{2,3}\$?|\$)\s*(.+)$/);
+  if (prefixMatch) {
+    symbolPart = prefixMatch[1];
+    numberPart = prefixMatch[2];
+  } else {
+    // Si no, intentar capturar símbolo al final (ej: 1.234,56 €)
+    const suffixMatch = trimmed.match(/^(.+?)\s*([^\d\s,.-]+)$/);
+    if (suffixMatch) {
+      numberPart = suffixMatch[1];
+      symbolPart = suffixMatch[2];
+    } else {
+      // Si no hay coincidencia, usar todo como número y € como símbolo por defecto
+      numberPart = trimmed;
+      symbolPart = "€";
+    }
+  }
 
   return `
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin:0 auto; display:inline-table;">
       <tbody>
         <tr>
           <td style="font-size:42px;font-weight:700;line-height:1;color:${textColor};padding-right:6px;white-space:nowrap;">
-            ${escapeHtml(numberPart)}
+            ${escapeHtml(symbolPart)} ${escapeHtml(numberPart)}
           </td>
-          <td style="font-size:28px;font-weight:700;line-height:1;color:${textColor};vertical-align:baseline;padding-top:6px;">
-            ${escapeHtml(symbolPart)}
-          </td>
+          ${showIVASuffix ? `<td style="font-size:14px;font-weight:normal;color:${textColor};vertical-align:baseline;padding-top:12px;padding-left:6px;white-space:nowrap;">+ IVA</td>` : ''}
         </tr>
       </tbody>
     </table>
@@ -82,18 +100,19 @@ function renderAlignedAmount(amountText?: string, textColor: string = "#ffffff")
 }
 
 // STYLE 1: Moderno - 3 columnas con colores vibrantes (inspirado en el email de Brandooers)
-function buildStyle1Moderno(plans: QuotationPlan[], comments?: string) {
+function buildStyle1Moderno(plans: QuotationPlan[], comments?: string, bestChoiceIndex: number | null = 1, bestChoiceLabel: string = "⭐ MÁS ELEGIDO ⭐") {
   const colors = ["#17a2b8", "#e74c3c", "#1abc9c"];
   
   const cards = plans
     .map((plan, idx) => {
       const color = colors[idx] || colors[0];
-      const isBest = idx === 1 && plans.length > 1;
+      const isBest = bestChoiceIndex === idx && plans.length > 1;
+      const amountText = plan.untaxedAmountText || plan.totalAmountText || "";
       
       return `<td style="width: ${100 / plans.length}%; vertical-align: top; padding: 0px 10px;">
         <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: rgb(255, 255, 255); border-radius: 8px; overflow: hidden;">
           <tbody>
-            ${isBest ? `<tr><td style="background-color: ${color}; padding: 10px 0px; text-align: center;"><span style="color: rgb(255, 255, 255); font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">⭐ MÁS ELEGIDO ⭐</span></td></tr>` : ''}
+            ${isBest ? `<tr><td style="background-color: ${color}; padding: 10px 0px; text-align: center;"><span style="color: rgb(255, 255, 255); font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">${escapeHtml(bestChoiceLabel)}</span></td></tr>` : ''}
             
             <tr><td style="background-color: ${color}; height: 4px; line-height: 0; font-size: 0px;">&nbsp;</td></tr>
             
@@ -103,10 +122,10 @@ function buildStyle1Moderno(plans: QuotationPlan[], comments?: string) {
               <div style="background-color: ${color}; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
                 <p style="margin: 0px 0px 5px; font-size: 14px; color: rgb(255, 255, 255); text-transform: uppercase; font-weight: 600;">TOTAL CONTRATO</p>
                 <div style="margin: 0px 0px 10px; line-height: 1; text-align: center;">
-                  ${renderAlignedAmount(plan.totalAmountText || "", "#ffffff")}
+                  ${renderAlignedAmount(amountText, "#ffffff", true)}
                 </div>
                 ${plan.duration ? `<p style="margin: 0px 0px 8px; font-size: 13px; color: rgb(255, 255, 255);">${translateDuration(plan.duration)}</p>` : ''}
-                <p style="margin: 0px; font-size: 12px; color: rgba(255, 255, 255, 0.85);">Total mensual: ${escapeHtml(calculateMonthlyPrice(plan))}</p>
+                <p style="margin: 0px; font-size: 12px; color: rgba(255, 255, 255, 0.85);">Coste medio usuario/mes: ${escapeHtml(calculateCostPerUserMonth(plan))}</p>
               </div>
 
               <div style="background-color: ${isBest ? 'rgb(255, 251, 245)' : 'rgb(254, 254, 254)'}; border: 1px solid ${isBest ? 'rgb(255, 232, 204)' : 'rgb(233, 236, 239)'}; padding: 20px; border-radius: 6px; margin-bottom: 25px;">
@@ -133,7 +152,7 @@ function buildStyle1Moderno(plans: QuotationPlan[], comments?: string) {
                 <tbody>
                   <tr>
                     <td style="text-align: center;">
-                      <a href="${plan.ctaUrl}" style="color: rgb(255, 255, 255); display: inline-block; padding: 16px 40px; background-color: ${color}; text-decoration-line: none; font-size: 16px; font-weight: 600; border-radius: 4px;" target="_blank">Comenzar ahora</a>
+                      <a href="${plan.ctaUrl}" style="color: rgb(255, 255, 255); display: inline-block; padding: 16px 40px; background-color: ${color}; text-decoration-line: none; font-size: 16px; font-weight: 600; border-radius: 4px;" target="_blank">Ver detalles</a>
                     </td>
                   </tr>
                 </tbody>
@@ -176,7 +195,8 @@ function buildStyle1Moderno(plans: QuotationPlan[], comments?: string) {
                       <tr>
                         <td style="padding: 25px; background-color: rgb(255, 255, 255); border-radius: 8px; border-left: 4px solid rgb(40, 167, 69);">
                           <p style="margin: 0px 0px 15px; font-size: 14px; color: rgb(44, 62, 80); line-height: 1.7;"><strong style="color: rgb(0, 123, 255);">Descuentos aplicables:</strong> Los descuentos se aplican exclusivamente a licenciamientos. No aplican en servicios de hosting Odoo.sh. Las condiciones están sujetas a cambios en cada renovación.</p>
-                          <p style="margin: 0px; font-size: 14px; color: rgb(44, 62, 80); line-height: 1.7;"><strong style="color: rgb(108, 91, 123);">Maximiza tu inversión:</strong> Contacta con tu Partner Manager para cualquier aclaración o negociación personalizada. Estamos aquí para ayudarte a conseguir las ofertas más ajustadas y rentables para tu empresa, adaptadas a tus necesidades específicas.</p>
+                          <p style="margin: 0px 0px 15px; font-size: 14px; color: rgb(44, 62, 80); line-height: 1.7;"><strong style="color: rgb(108, 91, 123);">Maximiza tu inversión:</strong> Contacta con tu Partner Manager para cualquier aclaración o negociación personalizada. Estamos aquí para ayudarte a conseguir las ofertas más ajustadas y rentables para tu empresa, adaptadas a tus necesidades específicas.</p>
+                          <p style="margin: 0px; font-size: 14px; color: rgb(44, 62, 80); line-height: 1.7;"><strong style="color: rgb(231, 76, 60);">Protección Contra Subidas:</strong> En contratos multianuales disfruta de una protección contra subidas a la hora de la renovación de hasta un +7%. Evita subidas de IPC anuales y asegurate un coste todavía por debajo del mercado en tu renovación.</p>
                         </td>
                       </tr>
                     </tbody>
@@ -195,6 +215,7 @@ function buildStyle1Moderno(plans: QuotationPlan[], comments?: string) {
 function buildStyle2Compacto(plans: QuotationPlan[], comments?: string) {
   const sections = plans
     .map((plan) => {
+      const amountText = plan.untaxedAmountText || plan.totalAmountText || "";
       return `<h2 style="font-size: 18px; font-weight: bold; color: #1f2937; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; margin: 25px 0 15px 0;">
         ${escapeHtml(plan.title || "Plan")}
         ${plan.subtitle ? `<span style="font-weight: normal; font-size: 14px; color: #666;"> - ${escapeHtml(plan.subtitle)}</span>` : ''}
@@ -202,15 +223,18 @@ function buildStyle2Compacto(plans: QuotationPlan[], comments?: string) {
       <table width="100%" border="0" cellpadding="0" cellspacing="0" style="font-size: 14px; color: #333; line-height: 1.8;">
         <tr>
           <td style="width: 180px; font-weight: 600; padding: 8px 0;">Total Contrato:</td>
-          <td style="padding: 8px 0; font-weight: 600; color: #1e40af;">${escapeHtml(plan.totalAmountText || "")}</td>
+          <td style="padding: 8px 0; font-weight: 600; color: #1e40af;">
+            ${escapeHtml(amountText)}
+            <span style="font-size: 0.8em; font-weight: normal; color: #666;"> + IVA</span>
+          </td>
         </tr>
         ${plan.duration ? `<tr>
           <td style="width: 180px; font-weight: 600; padding: 8px 0;">Duración:</td>
           <td style="padding: 8px 0;">${translateDuration(plan.duration)}</td>
         </tr>` : ''}
         <tr>
-          <td style="width: 180px; font-weight: 600; padding: 8px 0;">Total Mensual:</td>
-          <td style="padding: 8px 0;">${escapeHtml(calculateMonthlyPrice(plan))}</td>
+          <td style="width: 180px; font-weight: 600; padding: 8px 0;">Coste medio usuario/mes:</td>
+          <td style="padding: 8px 0;">${escapeHtml(calculateCostPerUserMonth(plan))}</td>
         </tr>
         ${plan.paymentTerms ? `<tr>
           <td style="width: 180px; font-weight: 600; padding: 8px 0; vertical-align: top;">Condiciones de Pago:</td>
@@ -226,7 +250,7 @@ function buildStyle2Compacto(plans: QuotationPlan[], comments?: string) {
         </tr>` : ''}
         <tr>
           <td colspan="2" style="padding-top: 16px;">
-            <a href="${plan.ctaUrl}" style="display: inline-block; background-color: #5a67d8; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 13px;">Ver Cotización Detallada</a>
+            <a href="${plan.ctaUrl}" style="display: inline-block; background-color: #5a67d8; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 13px;">Ver detalles</a>
           </td>
         </tr>
       </table>
@@ -247,9 +271,15 @@ function buildStyle2Compacto(plans: QuotationPlan[], comments?: string) {
 // STYLE 3: Minimalista - Tabla comparativa
 function buildStyle3Minimalista(plans: QuotationPlan[], comments?: string) {
   const characteristics = [
-    { label: "Total Contrato", key: "totalAmountText" },
+    { 
+      label: "Total Contrato", 
+      key: (plan: QuotationPlan) => {
+        const val = plan.untaxedAmountText || plan.totalAmountText || "";
+        return val ? `${val} + IVA` : "";
+      }
+    },
     { label: "Duración", key: "duration", transform: translateDuration },
-    { label: "Total Mensual", key: calculateMonthlyPrice },
+    { label: "Coste medio usuario/mes", key: calculateCostPerUserMonth },
     { label: "Cond. de Pago", key: "paymentTerms" },
     { label: "Ahorro total", key: "totalSavingsText" },
     { label: "Ideal para", key: "summaryLine" },
@@ -260,10 +290,13 @@ function buildStyle3Minimalista(plans: QuotationPlan[], comments?: string) {
       const cellContent = plans
         .map((plan) => {
           let value = typeof char.key === "function" ? char.key(plan) : (plan as any)[char.key];
+          // @ts-ignore
           if (char.transform && value) {
+             // @ts-ignore
             value = char.transform(value);
           }
           // Agregar white-space: pre-line para condiciones de pago
+          // @ts-ignore
           const extraStyle = char.key === "paymentTerms" ? " white-space: pre-line;" : "";
           return `<td style="padding: 10px 15px; border-bottom: 1px solid #e0e0e0;${extraStyle}">${escapeHtml(value || "")}</td>`;
         })
@@ -281,7 +314,7 @@ function buildStyle3Minimalista(plans: QuotationPlan[], comments?: string) {
     ${plans
       .map(
         (plan) =>
-          `<td style="padding: 10px 15px; border-bottom: 1px solid #e0e0e0;"><a href="${plan.ctaUrl}" style="color: #1e40af; text-decoration: none; font-weight: bold;">Ver Cotización</a></td>`
+          `<td style="padding: 10px 15px; border-bottom: 1px solid #e0e0e0;"><a href="${plan.ctaUrl}" style="color: #1e40af; text-decoration: none; font-weight: bold;">Ver detalles</a></td>`
       )
       .join("")}
   </tr>`;
@@ -307,14 +340,14 @@ function buildStyle3Minimalista(plans: QuotationPlan[], comments?: string) {
   </div>`;
 }
 
-export function buildEmailBody(style: StyleVariant, plans: QuotationPlan[], comments?: string) {
+export function buildEmailBody(style: StyleVariant, plans: QuotationPlan[], comments?: string, bestChoiceIndex: number | null = 1, bestChoiceLabel: string = "⭐ MÁS ELEGIDO ⭐") {
   if (style === "style2") {
     return buildStyle2Compacto(plans, comments);
   }
   if (style === "style3") {
     return buildStyle3Minimalista(plans, comments);
   }
-  return buildStyle1Moderno(plans, comments);
+  return buildStyle1Moderno(plans, comments, bestChoiceIndex, bestChoiceLabel);
 }
 
 export function buildFullHtml(bodyHtml: string) {
