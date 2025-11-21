@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { StyleSelector } from "./StyleSelector";
 import { EmailPreview, StyleVariant } from "@/components/email-templates/EmailPreview";
 import { QuotationPlan } from "@/lib/types/quotation";
+import { cn } from "@/lib/utils";
 
 interface OutputPanelProps {
   viewMode: "code" | "preview";
@@ -94,14 +95,14 @@ export function OutputPanel({
     <div className="flex h-full flex-col">
       {/* Selector de estilos */}
       <div className="mb-4">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-xs font-medium text-white/80">🎨 Estilo de email</span>
+        <div className="mb-2 flex items-center gap-2">
+          <span className="text-xs font-medium text-[var(--accent)]">🎨 Estilo de email</span>
         </div>
         <StyleSelector value={style} onChange={onStyleChange} />
       </div>
 
       <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold text-white">Salida de email</h2>
+        <h2 className="text-sm font-semibold text-[var(--accent)]">Salida de email</h2>
         <div className="flex items-center gap-2">
           <Tabs
             options={[
@@ -115,11 +116,10 @@ export function OutputPanel({
                 <Button
                   onClick={handleCopyHtml}
                   title="Copiar propuesta al portapapeles"
-                  className={`font-medium transition-all duration-300 ${
-                    isCopying
-                      ? "bg-gradient-to-r from-green-500 to-green-600 text-white scale-105 animate-pulse"
-                      : "bg-gradient-to-r from-[#ff7a7a] to-[#ffb347] text-black hover:from-[#ff6666] hover:to-[#ff9933]"
-                  }`}
+                  className={cn(
+                    "font-medium transition-all duration-300",
+                    isCopying && "scale-105 animate-pulse bg-[var(--accent-soft)] text-white"
+                  )}
                 >
                   {isCopying ? "✅ ¡Copiado!" : "📋 Copiar Propuesta"}
                 </Button>
@@ -145,7 +145,7 @@ export function OutputPanel({
             />
           </div>
         ) : (
-          <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-white/20 text-sm text-white/60">
+          <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-[var(--card-border)] bg-[var(--surface-muted)] text-sm text-[var(--muted)]">
             Genera el HTML primero para habilitar la vista previa.
           </div>
         )}

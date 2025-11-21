@@ -20,7 +20,7 @@ export function Tabs({ options, value, onChange, className, ...props }: TabsProp
   return (
     <div
       className={cn(
-        "inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1 text-sm",
+        "inline-flex items-center gap-1 rounded-lg border border-[var(--card-border)] bg-[var(--surface-muted)] p-1 text-sm transition-colors",
         className
       )}
       {...props}
@@ -33,8 +33,10 @@ export function Tabs({ options, value, onChange, className, ...props }: TabsProp
             type="button"
             onClick={() => onChange(option.value)}
             className={cn(
-              "flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium transition",
-              isActive ? "bg-white/15 text-white" : "text-white/60 hover:text-white/80"
+              "flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+              isActive
+                ? "bg-[var(--accent)] text-white shadow-sm"
+                : "text-[var(--accent)] hover:bg-[var(--card-bg)]"
             )}
           >
             {option.icon && <span>{option.icon}</span>}

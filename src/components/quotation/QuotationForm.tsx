@@ -47,9 +47,9 @@ export function QuotationForm({
 }: QuotationFormProps) {
   return (
     <Card className="space-y-6">
-      <div className="border-b border-white/10 pb-4">
-        <h2 className="mb-1 text-base font-semibold text-white">Configuración de Propuesta</h2>
-        <p className="text-xs text-white/60">
+      <div className="border-b border-[var(--card-border)] pb-4">
+        <h2 className="mb-1 text-base font-semibold text-[var(--accent)]">Configuración de Propuesta</h2>
+        <p className="text-xs text-[var(--muted)]">
           Personaliza tus propuestas de licenciamiento
         </p>
       </div>
@@ -59,8 +59,8 @@ export function QuotationForm({
         {/* Número de cotizaciones */}
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-white/80">📊 Número de propuestas</span>
-            <span className="rounded px-2 py-1 text-[11px] bg-white/10 text-white/60">{linkCount} seleccionada{linkCount !== 1 ? 's' : ''}</span>
+            <span className="text-xs font-medium text-[var(--accent)]">📊 Número de propuestas</span>
+            <span className="rounded bg-[var(--pill-bg)] px-2 py-1 text-[11px] text-[var(--muted)]">{linkCount} seleccionada{linkCount !== 1 ? 's' : ''}</span>
           </div>
           <Select
             value={String(linkCount)}
@@ -75,8 +75,8 @@ export function QuotationForm({
         {/* Nombres y URLs de cotización */}
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-white/80">🔗 Propuestas</span>
-            <span className="rounded px-2 py-1 text-[11px] bg-white/10 text-white/60">Nombres editables</span>
+            <span className="text-xs font-medium text-[var(--accent)]">🔗 Propuestas</span>
+            <span className="rounded bg-[var(--pill-bg)] px-2 py-1 text-[11px] text-[var(--muted)]">Nombres editables</span>
           </div>
           <LinkInputs 
             linkCount={linkCount} 
@@ -92,16 +92,16 @@ export function QuotationForm({
             bestChoiceLabel={bestChoiceLabel}
             onBestChoiceLabelChange={onBestChoiceLabelChange}
           />
-          <p className="text-xs text-white/50">
-            * URLs de Odoo: <code className="bg-white/5 px-1 py-0.5 rounded text-[11px]">https://odoo.com/my/orders/...</code>
+          <p className="text-xs text-[var(--muted)]">
+            * URLs de Odoo: <code className="rounded bg-[var(--code-bg)] px-1 py-0.5 text-[11px]">https://odoo.com/my/orders/...</code>
           </p>
         </div>
 
         {/* Comentarios adicionales */}
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-white/80">💡 A tener en cuenta</span>
-            <span className="rounded px-2 py-1 text-[11px] bg-white/10 text-white/60">Opcional</span>
+            <span className="text-xs font-medium text-[var(--accent)]">💡 A tener en cuenta</span>
+            <span className="rounded bg-[var(--pill-bg)] px-2 py-1 text-[11px] text-[var(--muted)]">Opcional</span>
           </div>
           <Textarea
             placeholder="Agrega información que consideres importante para tus clientes..."
@@ -111,7 +111,7 @@ export function QuotationForm({
         </div>
       </div>
 
-      <div className="border-t border-white/10 pt-6">
+      <div className="border-t border-[var(--card-border)] pt-6">
         <Button onClick={onGenerate} loading={loading} className="w-full">
           ⚡ Generar Correo
         </Button>

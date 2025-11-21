@@ -22,8 +22,8 @@ export function StyleSelector({ value, onChange }: StyleSelectorProps) {
           onClick={() => onChange(option.value)}
           className={`flex-1 rounded-lg border px-3 py-2 text-xs font-medium transition-all ${
             value === option.value
-              ? "border-[#ff7a7a] bg-gradient-to-r from-[#ff7a7a]/20 to-[#ffb347]/20 text-white shadow-[0_0_12px_rgba(255,122,122,0.3)]"
-              : "border-white/20 bg-white/5 text-white/70 hover:border-white/30 hover:bg-white/10 hover:text-white/90"
+              ? "border-[var(--accent)] bg-[var(--accent)] text-white shadow-md"
+              : "border-[var(--card-border)] bg-[var(--card-bg)] text-[var(--accent)] hover:border-[var(--accent)] hover:bg-[var(--surface-muted)]"
           }`}
           title={option.label}
         >

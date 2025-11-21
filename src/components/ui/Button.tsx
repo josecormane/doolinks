@@ -20,12 +20,13 @@ export function Button({
   ...props
 }: ButtonProps) {
   const baseStyles =
-    "inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-60";
+    "inline-flex items-center justify-center gap-2 rounded-lg px-6 py-2.5 text-sm font-semibold transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-60";
 
   const variants: Record<ButtonVariant, string> = {
     primary:
-      "bg-gradient-to-r from-[#ff7a7a] to-[#ffb347] text-[#1b1220] shadow-[0_12px_22px_rgba(255,122,122,0.35)] hover:shadow-[0_16px_30px_rgba(255,122,122,0.4)] hover:-translate-y-0.5",
-    ghost: "border border-white/10 bg-white/5 text-white/80 hover:bg-white/10",
+      "bg-[var(--accent)] text-white shadow-md transition-colors hover:bg-[var(--accent-hover)] hover:shadow-lg focus-visible:outline-[var(--accent)]",
+    ghost:
+      "border border-[var(--card-border)] bg-[var(--card-bg)] text-[var(--accent)] hover:bg-[var(--surface-muted)] focus-visible:outline-[var(--accent)]",
   };
 
   return (
@@ -35,7 +36,7 @@ export function Button({
       {...props}
     >
       {loading && (
-        <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/60 border-t-transparent" />
+        <span className="h-4 w-4 animate-spin rounded-full border-2 border-current/60 border-t-transparent" />
       )}
       {children}
     </button>

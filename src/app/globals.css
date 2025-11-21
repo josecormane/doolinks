@@ -1,21 +1,47 @@
 @import "tailwindcss";
 
 :root {
+  /* Odoo Brand Colors */
+  --odoo-primary: #714B67;
+  --odoo-secondary: #017E84;
+  --odoo-gray: #8F8F8F;
+  --odoo-gold: #E4A900;
+  
+  /* Light Theme Colors */
+  --bg: #FFFFFF;
+  --card-bg: #F8F9FA;
+  --card-border: #E9ECEF;
+  --accent: #714B67;
+  --accent-soft: #017E84;
+  --accent-hover: #5a3b52;
+  --text: #212529;
+  --muted: #8F8F8F;
+  --surface-muted: #f5f2f8;
+  --surface-highlight: #eef8f6;
+  --pill-bg: #f2edf4;
+  --code-bg: #f8f9fb;
+}
+
+.dark {
+  /* Dark Theme Colors */
   --bg: #0b1020;
   --card-bg: #141a2a;
   --card-border: #262c3f;
-  --accent: #ff5b5b;
-  --accent-soft: #ffb347;
-  --accent-2: #32d0ff;
+  --accent: #875f7a;
+  --accent-soft: #019ca3;
+  --accent-hover: #a17793;
   --text: #f5f7ff;
-  --muted: #8a92b5;
+  --muted: #a0a0a0;
+  --surface-muted: rgba(255, 255, 255, 0.04);
+  --surface-highlight: rgba(1, 156, 163, 0.15);
+  --pill-bg: rgba(255, 255, 255, 0.1);
+  --code-bg: rgba(20, 26, 42, 0.9);
 }
 
 @theme inline {
   --color-background: var(--bg);
   --color-foreground: var(--text);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter);
 }
 
 @layer base {
@@ -23,18 +49,29 @@
     @apply m-0 min-h-screen antialiased;
     background-color: var(--bg);
     color: var(--text);
-    font-family: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    font-family: var(--font-inter), Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
       sans-serif;
+    line-height: 1.45;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    line-height: 1;
   }
 
   code {
-    font-family: var(--font-geist-mono, "SFMono-Regular"), Consolas, "Courier New", monospace;
+    font-family: "SFMono-Regular", Consolas, "Courier New", monospace;
   }
 }
 
 @layer utilities {
   .bg-shell-gradient {
-    background-color: #050814;
-    background-image: radial-gradient(circle at top, #171f3b, #050814 60%);
+    background-color: #FFFFFF;
+    background-image: linear-gradient(to bottom, #F8F9FA, #FFFFFF);
+  }
+  
+  .dark .bg-shell-gradient {
+    background-color: #0b1020;
+    background-image: linear-gradient(to bottom, #0b1020, #141a2a);
   }
 }

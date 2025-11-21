@@ -19,9 +19,9 @@ export function StatusMessage({
   ...props
 }: StatusMessageProps) {
   const variantClasses: Record<StatusVariant, string> = {
-    neutral: "text-white/70",
-    success: "text-emerald-300",
-    error: "text-red-300",
+    neutral: "text-[var(--muted)]",
+    success: "text-[var(--accent-soft)]",
+    error: "text-red-500",
   };
 
   return (
@@ -30,7 +30,7 @@ export function StatusMessage({
       {...props}
     >
       <span>{children}</span>
-      {rightSlot && <span className="text-white/60">{rightSlot}</span>}
+      {rightSlot && <span className="text-[var(--muted)]">{rightSlot}</span>}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { Input } from "@/components/ui/Input";
+import { cn } from "@/lib/utils";
 
 interface LinkInputsProps {
   linkCount: number;
@@ -41,14 +42,14 @@ export function LinkInputs({
   return (
     <div className="space-y-3">
       {linkCount > 1 && (
-         <div className="mb-2 rounded-lg border border-yellow-500/20 bg-yellow-500/5 p-3">
-            <label className="mb-1.5 block text-[11px] font-medium text-yellow-200/80">
-              🏷️ Texto etiqueta "Más elegido"
+         <div className="mb-2 rounded-lg border border-[var(--card-border)] bg-[var(--surface-highlight)] p-3">
+            <label className="mb-1.5 block text-[11px] font-medium text-[var(--accent-soft)]">
+              🏷️ Texto etiqueta &quot;Más elegido&quot;
             </label>
             <Input 
                value={bestChoiceLabel} 
                onChange={(e) => onBestChoiceLabelChange(e.target.value)} 
-               className="text-sm border-yellow-500/30 bg-black/20 text-yellow-100 placeholder:text-yellow-500/30 focus:border-yellow-500/50"
+               className="text-sm focus:border-[var(--accent-soft)] focus:ring-[color:rgba(1,126,132,0.35)]"
             />
          </div>
       )}
@@ -64,31 +65,55 @@ export function LinkInputs({
           );
         }
 
+        const isBestChoice = bestChoiceIndex === idx && linkCount > 1;
+
         return (
-          <div key={`link-${idx}`} className={`rounded-lg border p-4 transition-colors ${bestChoiceIndex === idx && linkCount > 1 ? 'border-yellow-500/30 bg-yellow-500/5' : 'border-white/10 bg-white/5'}`}>
+          <div
+            key={`link-${idx}`}
+            className={cn(
+              "rounded-lg border p-4 transition-colors",
+              isBestChoice
+                ? "border-[var(--accent-soft)] bg-[var(--surface-highlight)]"
+                : "border-[var(--card-border)] bg-[var(--card-bg)]"
+            )}
+          >
             <div className="mb-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-r from-[#ff7a7a]/30 to-[#ffb347]/30 text-xs font-bold text-white">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--accent)] text-xs font-bold text-white">
                   {idx + 1}
                 </span>
-                <span className="text-xs font-medium text-white/60">Propuesta {idx + 1}</span>
+                <span className="text-xs font-medium text-[var(--muted)]">Propuesta {idx + 1}</span>
               </div>
               
               {linkCount > 1 && (
-                <label className="flex items-center gap-2 cursor-pointer select-none group">
-                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${bestChoiceIndex === idx ? 'border-yellow-400 bg-yellow-400/20' : 'border-white/20 group-hover:border-white/40'}`}>
-                      {bestChoiceIndex === idx && <div className="w-2 h-2 rounded-full bg-yellow-400" />}
-                    </div>
-                    <input 
-                        type="radio" 
-                        name="bestChoice" 
-                        checked={bestChoiceIndex === idx} 
-                        onChange={() => onBestChoiceIndexChange(idx)}
-                        className="hidden"
-                    />
-                    <span className={`text-[10px] uppercase font-bold tracking-wider transition-colors ${bestChoiceIndex === idx ? 'text-yellow-400' : 'text-white/30 group-hover:text-white/50'}`}>
-                        Más elegido
-                    </span>
+                <label className="group flex cursor-pointer select-none items-center gap-2">
+                  <div
+                    className={cn(
+                      "flex h-4 w-4 items-center justify-center rounded-full border transition-colors",
+                      bestChoiceIndex === idx
+                        ? "border-[var(--accent-soft)] bg-[color:rgba(1,126,132,0.18)]"
+                        : "border-[var(--card-border)] group-hover:border-[var(--accent)]"
+                    )}
+                  >
+                    {bestChoiceIndex === idx && <div className="h-2 w-2 rounded-full bg-[var(--accent-soft)]" />}
+                  </div>
+                  <input
+                    type="radio"
+                    name="bestChoice"
+                    checked={bestChoiceIndex === idx}
+                    onChange={() => onBestChoiceIndexChange(idx)}
+                    className="hidden"
+                  />
+                  <span
+                    className={cn(
+                      "text-[10px] font-bold uppercase tracking-wider transition-colors",
+                      bestChoiceIndex === idx
+                        ? "text-[var(--accent-soft)]"
+                        : "text-[var(--muted)] group-hover:text-[var(--accent)]"
+                    )}
+                  >
+                    Más elegido
+                  </span>
                 </label>
               )}
             </div>
@@ -97,7 +122,7 @@ export function LinkInputs({
               {/* Nombre del plan e Ideal para en la misma fila */}
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <div>
-                  <label className="mb-1.5 block text-[11px] font-medium text-white/60">
+                  <label className="mb-1.5 block text-[11px] font-medium text-[var(--accent)]">
                     📝 Nombre del plan
                   </label>
                   <Input
@@ -109,7 +134,7 @@ export function LinkInputs({
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-[11px] font-medium text-white/60">
+                  <label className="mb-1.5 block text-[11px] font-medium text-[var(--accent)]">
                     💡 Ideal para
                   </label>
                   <Input
@@ -123,7 +148,7 @@ export function LinkInputs({
 
               {/* URL de cotización Odoo en la fila siguiente */}
               <div>
-                <label className="mb-1.5 block text-[11px] font-medium text-white/60">
+                <label className="mb-1.5 block text-[11px] font-medium text-[var(--accent)]">
                   🔗 URL de cotización Odoo
                 </label>
                 <Input
