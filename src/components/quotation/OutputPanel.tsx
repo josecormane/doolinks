@@ -117,11 +117,16 @@ export function OutputPanel({
                   onClick={handleCopyHtml}
                   title="Copiar propuesta al portapapeles"
                   className={cn(
-                    "font-medium transition-all duration-300",
-                    isCopying && "scale-105 animate-pulse bg-[var(--accent-soft)] text-white"
+                    "relative px-8 py-3 text-base font-bold shadow-xl transition-all duration-300",
+                    "bg-gradient-to-r from-[#875A7B] to-[#A084CA] hover:from-[#714B67] hover:to-[#875A7B]",
+                    "hover:shadow-2xl hover:scale-105 active:scale-95",
+                    "ring-2 ring-[#A084CA]/20 hover:ring-[#A084CA]/40",
+                    isCopying && "scale-110 animate-pulse from-[#00A09D] to-[#00C9C3] ring-[#00A09D]/60"
                   )}
                 >
-                  {isCopying ? "✅ ¡Copiado!" : "📋 Copiar Propuesta"}
+                  <span className="relative z-10">
+                    {isCopying ? "✅ ¡Copiado!" : "📋 Copiar Propuesta"}
+                  </span>
                 </Button>
             )}
         </div>

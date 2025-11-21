@@ -47,7 +47,7 @@ function calculateCostPerUserMonth(plan: QuotationPlan): string {
 
 function formatComments(comments?: string) {
   if (!comments) return "";
-  return `<div style="margin-top:18px;padding:12px 14px;border-radius:10px;background:#fef9c3;color:#713f12;font-size:13px;">
+  return `<div style="margin-top:18px;padding:12px 14px;border-radius:10px;background:#F3EEFF;border-left:4px solid #714B67;color:#4A2C42;font-size:13px;">
     <strong>💡 A tener en cuenta:</strong><br/>${escapeHtml(comments).replace(/\n/g, "<br/>")}
   </div>`;
 }
@@ -93,14 +93,18 @@ function renderAlignedAmount(amountText?: string, textColor: string = "#ffffff",
   `;
 }
 
-// STYLE 1: Moderno - 3 columnas con colores vibrantes (inspirado en el email de Brandooers)
+// STYLE 1: Moderno - 3 columnas con branding Odoo
 function buildStyle1Moderno(plans: QuotationPlan[], comments?: string, bestChoiceIndex: number | null = 1, bestChoiceLabel: string = "⭐ MÁS ELEGIDO ⭐") {
-  const colors = ["#17a2b8", "#e74c3c", "#1abc9c"];
+  // Colores oficiales del branding de Odoo
+  const baseColors = ["#714B67", "#875A7B"];
+  const highlightColor = "#A084CA"; // Púrpura claro para "Más elegido"
   
   const cards = plans
     .map((plan, idx) => {
-      const color = colors[idx] || colors[0];
       const isBest = bestChoiceIndex === idx && plans.length > 1;
+      // Si es el "Más elegido", usar el color destacado (púrpura claro)
+      // Si no, usar colores base alternados
+      const color = isBest ? highlightColor : (baseColors[idx % baseColors.length] || baseColors[0]);
       const amountText = plan.untaxedAmountText || plan.totalAmountText || "";
       
       return `<td style="width: ${100 / plans.length}%; max-width: ${100 / plans.length}%; vertical-align: top; padding: 0px 10px;">
@@ -111,7 +115,7 @@ function buildStyle1Moderno(plans: QuotationPlan[], comments?: string, bestChoic
             <tr><td style="background-color: ${color}; height: 4px; line-height: 0; font-size: 0px;">&nbsp;</td></tr>
             
             <tr><td style="padding: 40px 30px; overflow: hidden;">
-              <h2 style="margin: 0px 0px 25px; font-size: 32px; color: rgb(44, 62, 80); text-align: center; font-weight: bold;">${escapeHtml(plan.title || "Plan")}</h2>
+              <h2 style="margin: 0px 0px 25px; font-size: 32px; color: #714B67; text-align: center; font-weight: bold;">${escapeHtml(plan.title || "Plan")}</h2>
               
               <div style="background-color: ${color}; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center; overflow: hidden;">
                 <p style="margin: 0px 0px 5px; font-size: 14px; color: rgb(255, 255, 255); text-transform: uppercase; font-weight: 600;">TOTAL CONTRATO</p>
@@ -137,8 +141,8 @@ function buildStyle1Moderno(plans: QuotationPlan[], comments?: string, bestChoic
               
               ${plan.summaryLine ? `
                 <div style="margin-bottom: 25px; text-align: center;">
-                  <p style="margin: 0px 0px 8px; font-size: 14px; font-weight: 600; color: rgb(44, 62, 80);">Ideal para:</p>
-                  <p style="margin: 0px; font-size: 13px; color: rgb(108, 117, 125); line-height: 1.6;">${escapeHtml(plan.summaryLine)}</p>
+                  <p style="margin: 0px 0px 8px; font-size: 14px; font-weight: 600; color: #714B67;">Ideal para:</p>
+                  <p style="margin: 0px; font-size: 13px; color: #875A7B; line-height: 1.6;">${escapeHtml(plan.summaryLine)}</p>
                 </div>
               ` : ''}
               
@@ -158,16 +162,16 @@ function buildStyle1Moderno(plans: QuotationPlan[], comments?: string, bestChoic
     })
     .join("");
 
-  return `<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="color: rgb(0, 0, 0); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: medium; background-color: rgb(249, 250, 251);">
+  return `<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="color: rgb(0, 0, 0); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: medium; background-color: #F5F5F5;">
     <tbody>
       <tr>
-        <td style="padding: 40px 20px; background-color: rgb(249, 250, 251);">
+        <td style="padding: 40px 20px; background-color: #F5F5F5;">
           <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 1200px; margin: 0px auto;">
             <tbody>
               <tr>
                 <td style="padding: 0px; text-align: center;">
-                  <h1 style="font-size: 28px; font-weight: bold; color: #1f2937; margin: 0 0 10px 0;">Propuesta de Licenciamiento</h1>
-                  <p style="color: #666; font-size: 14px; margin: 0 0 20px 0;">Comparación de opciones disponibles</p>
+                  <h1 style="font-size: 28px; font-weight: bold; color: #714B67; margin: 0 0 10px 0;">Propuesta de Licenciamiento Odoo</h1>
+                  <p style="color: #875A7B; font-size: 14px; margin: 0 0 20px 0;">Comparación de opciones disponibles</p>
                   ${formatComments(comments)}
                 </td>
               </tr>
@@ -187,10 +191,10 @@ function buildStyle1Moderno(plans: QuotationPlan[], comments?: string, bestChoic
                   <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 1200px; margin: 30px auto 0px;">
                     <tbody>
                       <tr>
-                        <td style="padding: 25px; background-color: rgb(255, 255, 255); border-radius: 8px; border-left: 4px solid rgb(40, 167, 69);">
-                          <p style="margin: 0px 0px 15px; font-size: 14px; color: rgb(44, 62, 80); line-height: 1.7;"><strong style="color: rgb(0, 123, 255);">Descuentos aplicables:</strong> Los descuentos se aplican exclusivamente a licenciamientos. No aplican en servicios de hosting Odoo.sh. Las condiciones están sujetas a cambios en cada renovación.</p>
-                          <p style="margin: 0px 0px 15px; font-size: 14px; color: rgb(44, 62, 80); line-height: 1.7;"><strong style="color: rgb(108, 91, 123);">Maximiza tu inversión:</strong> Contacta con tu Partner Manager para cualquier aclaración o negociación personalizada. Estamos aquí para ayudarte a conseguir las ofertas más ajustadas y rentables para tu empresa, adaptadas a tus necesidades específicas.</p>
-                          <p style="margin: 0px; font-size: 14px; color: rgb(44, 62, 80); line-height: 1.7;"><strong style="color: rgb(231, 76, 60);">Protección Contra Subidas:</strong> En contratos multianuales disfruta de una protección contra subidas a la hora de la renovación de hasta un +7%. Evita subidas de IPC anuales y asegurate un coste todavía por debajo del mercado en tu renovación.</p>
+                        <td style="padding: 25px; background-color: rgb(255, 255, 255); border-radius: 8px; border-left: 4px solid #00A09D;">
+                          <p style="margin: 0px 0px 15px; font-size: 14px; color: rgb(44, 62, 80); line-height: 1.7;"><strong style="color: #714B67;">Descuentos aplicables:</strong> Los descuentos se aplican exclusivamente a licenciamientos. No aplican en servicios de hosting Odoo.sh. Las condiciones están sujetas a cambios en cada renovación.</p>
+                          <p style="margin: 0px 0px 15px; font-size: 14px; color: rgb(44, 62, 80); line-height: 1.7;"><strong style="color: #875A7B;">Maximiza tu inversión:</strong> Contacta con tu Partner Manager para cualquier aclaración o negociación personalizada. Estamos aquí para ayudarte a conseguir las ofertas más ajustadas y rentables para tu empresa, adaptadas a tus necesidades específicas.</p>
+                          <p style="margin: 0px; font-size: 14px; color: rgb(44, 62, 80); line-height: 1.7;"><strong style="color: #00A09D;">Protección Contra Subidas:</strong> En contratos multianuales disfruta de una protección contra subidas a la hora de la renovación de hasta un +7%. Evita subidas de IPC anuales y asegurate un coste todavía por debajo del mercado en tu renovación.</p>
                         </td>
                       </tr>
                     </tbody>
@@ -205,19 +209,19 @@ function buildStyle1Moderno(plans: QuotationPlan[], comments?: string, bestChoic
   </table>`;
 }
 
-// STYLE 2: Compacto - Lista vertical por plan
+// STYLE 2: Compacto - Lista vertical por plan con branding Odoo
 function buildStyle2Compacto(plans: QuotationPlan[], comments?: string) {
   const sections = plans
     .map((plan) => {
       const amountText = plan.untaxedAmountText || plan.totalAmountText || "";
-      return `<h2 style="font-size: 18px; font-weight: bold; color: #1f2937; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; margin: 25px 0 15px 0;">
+      return `<h2 style="font-size: 18px; font-weight: bold; color: #714B67; border-bottom: 2px solid #E8E1E6; padding-bottom: 10px; margin: 25px 0 15px 0;">
         ${escapeHtml(plan.title || "Plan")}
-        ${plan.subtitle ? `<span style="font-weight: normal; font-size: 14px; color: #666;"> - ${escapeHtml(plan.subtitle)}</span>` : ''}
+        ${plan.subtitle ? `<span style="font-weight: normal; font-size: 14px; color: #875A7B;"> - ${escapeHtml(plan.subtitle)}</span>` : ''}
       </h2>
       <table width="100%" border="0" cellpadding="0" cellspacing="0" style="font-size: 14px; color: #333; line-height: 1.8;">
         <tr>
           <td style="width: 180px; font-weight: 600; padding: 8px 0;">Total Contrato:</td>
-          <td style="padding: 8px 0; font-weight: 600; color: #1e40af;">
+          <td style="padding: 8px 0; font-weight: 600; color: #714B67;">
             ${escapeHtml(amountText)}
             <span style="font-size: 0.8em; font-weight: normal; color: #666;"> + IVA</span>
           </td>
@@ -236,7 +240,7 @@ function buildStyle2Compacto(plans: QuotationPlan[], comments?: string) {
         </tr>` : ''}
         ${plan.totalSavingsText ? `<tr>
           <td style="width: 180px; font-weight: 600; padding: 8px 0;">Ahorro total:</td>
-          <td style="padding: 8px 0; font-weight: 600; color: #047857;">${escapeHtml(plan.totalSavingsText)}</td>
+          <td style="padding: 8px 0; font-weight: 600; color: #00A09D;">${escapeHtml(plan.totalSavingsText)}</td>
         </tr>` : ''}
         ${plan.summaryLine ? `<tr>
           <td style="width: 180px; font-weight: 600; padding: 8px 0;">Ideal para:</td>
@@ -244,7 +248,7 @@ function buildStyle2Compacto(plans: QuotationPlan[], comments?: string) {
         </tr>` : ''}
         <tr>
           <td colspan="2" style="padding-top: 16px;">
-            <a href="${plan.ctaUrl}" style="display: inline-block; background-color: #5a67d8; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 13px;">Ver detalles</a>
+            <a href="${plan.ctaUrl}" style="display: inline-block; background-color: #714B67; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 13px;">Ver detalles</a>
           </td>
         </tr>
       </table>
@@ -252,9 +256,9 @@ function buildStyle2Compacto(plans: QuotationPlan[], comments?: string) {
     })
     .join("");
 
-  return `<div style="padding: 20px; font-family: Arial, sans-serif; background-color: #f9fafb;">
-    <div style="max-width: 700px; margin: 0 auto; background-color: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 30px 40px;">
-      <h1 style="font-size: 24px; font-weight: bold; color: #1f2937; margin: 0 0 20px 0;">Propuesta de Licenciamiento</h1>
+  return `<div style="padding: 20px; font-family: Arial, sans-serif; background-color: #F5F5F5;">
+    <div style="max-width: 700px; margin: 0 auto; background-color: white; border: 1px solid #E8E1E6; border-radius: 8px; padding: 30px 40px;">
+      <h1 style="font-size: 24px; font-weight: bold; color: #714B67; margin: 0 0 20px 0;">Propuesta de Licenciamiento Odoo</h1>
       ${formatComments(comments)}
       ${sections}
       ${disclaimer()}
@@ -262,7 +266,7 @@ function buildStyle2Compacto(plans: QuotationPlan[], comments?: string) {
   </div>`;
 }
 
-// STYLE 3: Minimalista - Tabla comparativa
+// STYLE 3: Minimalista - Tabla comparativa con branding Odoo
 function buildStyle3Minimalista(plans: QuotationPlan[], comments?: string) {
   const characteristics = [
     { 
@@ -292,36 +296,36 @@ function buildStyle3Minimalista(plans: QuotationPlan[], comments?: string) {
           // Agregar white-space: pre-line para condiciones de pago
           // @ts-ignore
           const extraStyle = char.key === "paymentTerms" ? " white-space: pre-line;" : "";
-          return `<td style="padding: 10px 15px; border-bottom: 1px solid #e0e0e0;${extraStyle}">${escapeHtml(value || "")}</td>`;
+          return `<td style="padding: 10px 15px; border-bottom: 1px solid #E8E1E6;${extraStyle}">${escapeHtml(value || "")}</td>`;
         })
         .join("");
 
       return `<tr>
-        <td style="padding: 10px 15px; border-bottom: 1px solid #e0e0e0; font-weight: 600; color: #333; background-color: #f9fafb; width: 25%;">${char.label}</td>
+        <td style="padding: 10px 15px; border-bottom: 1px solid #E8E1E6; font-weight: 600; color: #333; background-color: #FAF9FB; width: 25%;">${char.label}</td>
         ${cellContent}
       </tr>`;
     })
     .join("");
 
   const actionRow = `<tr>
-    <td style="padding: 10px 15px; border-bottom: 1px solid #e0e0e0; font-weight: 600; color: #333; background-color: #f9fafb; width: 25%;">Acción</td>
+    <td style="padding: 10px 15px; border-bottom: 1px solid #E8E1E6; font-weight: 600; color: #333; background-color: #FAF9FB; width: 25%;">Acción</td>
     ${plans
       .map(
         (plan) =>
-          `<td style="padding: 10px 15px; border-bottom: 1px solid #e0e0e0;"><a href="${plan.ctaUrl}" style="color: #1e40af; text-decoration: none; font-weight: bold;">Ver detalles</a></td>`
+          `<td style="padding: 10px 15px; border-bottom: 1px solid #E8E1E6;"><a href="${plan.ctaUrl}" style="color: #714B67; text-decoration: none; font-weight: bold;">Ver detalles</a></td>`
       )
       .join("")}
   </tr>`;
 
-  return `<div style="padding: 20px; font-family: Arial, sans-serif; background-color: #f3f4f6;">
-    <div style="max-width: 900px; margin: 0 auto; background-color: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 30px;">
-      <h1 style="font-size: 24px; font-weight: bold; color: #1f2937; margin: 0 0 25px 0;">Comparativa de Propuestas</h1>
+  return `<div style="padding: 20px; font-family: Arial, sans-serif; background-color: #F5F5F5;">
+    <div style="max-width: 900px; margin: 0 auto; background-color: white; border: 1px solid #E8E1E6; border-radius: 8px; padding: 30px;">
+      <h1 style="font-size: 24px; font-weight: bold; color: #714B67; margin: 0 0 25px 0;">Comparativa de Propuestas Odoo</h1>
       ${formatComments(comments)}
       <table width="100%" border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse; font-size: 14px; color: #333; margin-top: 20px;">
         <thead>
           <tr>
-            <th style="padding: 12px 15px; border-bottom: 2px solid #333; text-align: left; background-color: #f9fafb;">Característica</th>
-            ${plans.map((plan) => `<th style="padding: 12px 15px; border-bottom: 2px solid #333; text-align: left; font-size: 15px; color: #1f2937;">${escapeHtml(plan.title || "Plan")}</th>`).join("")}
+            <th style="padding: 12px 15px; border-bottom: 2px solid #714B67; text-align: left; background-color: #FAF9FB;">Característica</th>
+            ${plans.map((plan) => `<th style="padding: 12px 15px; border-bottom: 2px solid #714B67; text-align: left; font-size: 15px; color: #714B67;">${escapeHtml(plan.title || "Plan")}</th>`).join("")}
           </tr>
         </thead>
         <tbody>
