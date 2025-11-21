@@ -86,16 +86,10 @@ function renderAlignedAmount(amountText?: string, textColor: string = "#ffffff",
   }
 
   return `
-    <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin:0 auto; display:inline-table;">
-      <tbody>
-        <tr>
-          <td style="font-size:42px;font-weight:700;line-height:1;color:${textColor};padding-right:6px;white-space:nowrap;">
-            ${escapeHtml(symbolPart)} ${escapeHtml(numberPart)}
-          </td>
-          ${showIVASuffix ? `<td style="font-size:14px;font-weight:normal;color:${textColor};vertical-align:baseline;padding-top:12px;padding-left:6px;white-space:nowrap;">+ IVA</td>` : ''}
-        </tr>
-      </tbody>
-    </table>
+    <div style="font-size:42px;font-weight:700;line-height:1.2;color:${textColor};text-align:center;word-break:break-word;overflow-wrap:break-word;">
+      ${escapeHtml(symbolPart)} ${escapeHtml(numberPart)}
+    </div>
+    ${showIVASuffix ? `<div style="font-size:14px;font-weight:normal;color:${textColor};text-align:center;padding-top:8px;">+ IVA</div>` : ''}
   `;
 }
 
@@ -109,19 +103,19 @@ function buildStyle1Moderno(plans: QuotationPlan[], comments?: string, bestChoic
       const isBest = bestChoiceIndex === idx && plans.length > 1;
       const amountText = plan.untaxedAmountText || plan.totalAmountText || "";
       
-      return `<td style="width: ${100 / plans.length}%; vertical-align: top; padding: 0px 10px;">
-        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: rgb(255, 255, 255); border-radius: 8px; overflow: hidden;">
+      return `<td style="width: ${100 / plans.length}%; max-width: ${100 / plans.length}%; vertical-align: top; padding: 0px 10px;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: rgb(255, 255, 255); border-radius: 8px; overflow: hidden; table-layout: fixed;">
           <tbody>
             ${isBest ? `<tr><td style="background-color: ${color}; padding: 10px 0px; text-align: center;"><span style="color: rgb(255, 255, 255); font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">${escapeHtml(bestChoiceLabel)}</span></td></tr>` : ''}
             
             <tr><td style="background-color: ${color}; height: 4px; line-height: 0; font-size: 0px;">&nbsp;</td></tr>
             
-            <tr><td style="padding: 40px 30px;">
+            <tr><td style="padding: 40px 30px; overflow: hidden;">
               <h2 style="margin: 0px 0px 25px; font-size: 32px; color: rgb(44, 62, 80); text-align: center; font-weight: bold;">${escapeHtml(plan.title || "Plan")}</h2>
               
-              <div style="background-color: ${color}; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+              <div style="background-color: ${color}; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center; overflow: hidden;">
                 <p style="margin: 0px 0px 5px; font-size: 14px; color: rgb(255, 255, 255); text-transform: uppercase; font-weight: 600;">TOTAL CONTRATO</p>
-                <div style="margin: 0px 0px 10px; line-height: 1; text-align: center;">
+                <div style="margin: 0px 0px 10px; line-height: 1; text-align: center; overflow: hidden;">
                   ${renderAlignedAmount(amountText, "#ffffff", true)}
                 </div>
                 ${plan.duration ? `<p style="margin: 0px 0px 8px; font-size: 13px; color: rgb(255, 255, 255);">${translateDuration(plan.duration)}</p>` : ''}
