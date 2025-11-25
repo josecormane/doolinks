@@ -17,17 +17,36 @@ const getPreferredTheme = (): "light" | "dark" => {
 };
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<"light" | "dark">(() => getPreferredTheme());
+  const [mounted, setMounted] = useState(false);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    setMounted(true);
+    const preferredTheme = getPreferredTheme();
+    setTheme(preferredTheme);
+    document.documentElement.classList.toggle("dark", preferredTheme === "dark");
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     document.documentElement.classList.toggle("dark", theme === "dark");
     window.localStorage.setItem("theme", theme);
-  }, [theme]);
+  }, [theme, mounted]);
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
   };
+
+  if (!mounted) {
+    return (
+      <button
+        className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-2 text-[var(--text)] shadow-sm transition-all hover:border-[var(--accent)] hover:shadow-md"
+        aria-label="Switch theme"
+      >
+        <Moon className="h-5 w-5 text-[var(--accent)]" />
+      </button>
+    );
+  }
 
   return (
     <button

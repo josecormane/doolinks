@@ -51,11 +51,12 @@ export function QuotationGenerator() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-6">
             <Image
-              src="/odoo_logo.svg"
+              src="/odoo_spain_logo-i-e.png"
               alt="Odoo Logo"
               width={120}
               height={48}
-              className="object-contain"
+              className="h-auto w-[120px] object-contain"
+              style={{ height: "auto", width: "120px" }}
               priority
             />
             <h1 className="text-2xl font-semibold text-[var(--accent)]">Generador de propuestas</h1>
